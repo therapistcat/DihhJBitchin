@@ -34,9 +34,11 @@ async def lifespan(app: FastAPI):
 # Create FastAPI app
 app = FastAPI(
     title="DihhJ Backend API",
-    description="A FastAPI backend with user registration and login functionality",
+    description="A FastAPI backend for DihhJ Bitchers - Tea & Drama Platform",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    docs_url="/docs" if os.getenv("ENVIRONMENT") != "production" else None,
+    redoc_url="/redoc" if os.getenv("ENVIRONMENT") != "production" else None,
 )
 
 # Configure CORS origins
@@ -89,9 +91,26 @@ async def root():
 @app.get("/health", tags=["Health"])
 async def health_check():
     """
-    Health check endpoint
+    Health check endpoint with database connectivity
     """
-    return {"status": "healthy", "message": "API is running"}
+    try:
+        # Test database connection
+        db_status = await test_connection()
+        return {
+            "status": "healthy" if db_status else "degraded",
+            "message": "API is running",
+            "database": "connected" if db_status else "disconnected",
+            "environment": os.getenv("ENVIRONMENT", "development"),
+            "version": "1.0.0"
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "message": "API is running but database connection failed",
+            "error": str(e),
+            "environment": os.getenv("ENVIRONMENT", "development"),
+            "version": "1.0.0"
+        }
 
 if __name__ == "__main__":
     # Get configuration from environment
