@@ -204,6 +204,30 @@ DihhJ Backend/
 - Comprehensive error handling and logging
 - CORS enabled for frontend integration
 
+## 🚀 Deployment on Render
+
+### Environment Variables Required:
+Set these in your Render dashboard:
+
+```
+ENVIRONMENT=production
+MONGODB_URL=mongodb+srv://chulbuleMishraJi:<db_password>@chulbulemishraJi.8mcwh5g.mongodb.net/
+DB_PASSWORD=your_mongodb_atlas_password
+DATABASE_NAME=dihhj_backend
+CORS_ORIGINS=["https://dihhjbitchin-ido5.onrender.com"]
+```
+
+### Deployment Steps:
+1. Connect your GitHub repo to Render
+2. Set build command: `./build.sh`
+3. Set start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+4. Add environment variables above
+5. Deploy!
+
+### Frontend Integration
+Frontend is deployed at: https://dihhjbitchin-ido5.onrender.com
+Backend CORS is configured to allow requests from this domain.
+
 ## Next Steps (Optional Enhancements)
 
 - [ ] JWT token authentication

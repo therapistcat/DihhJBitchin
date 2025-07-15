@@ -44,12 +44,22 @@ app = FastAPI(
 # Configure CORS origins
 def get_cors_origins():
     """Get CORS origins from environment variable"""
-    cors_origins_str = os.getenv("CORS_ORIGINS", '["http://localhost:3000", "http://localhost:3001"]')
-    try:
-        return json.loads(cors_origins_str)
-    except json.JSONDecodeError:
-        # Fallback to default origins
-        return ["http://localhost:3000", "http://localhost:3001"]
+    # Default origins including production frontend
+    default_origins = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "https://dihhjbitchin-ido5.onrender.com"
+    ]
+
+    cors_origins_str = os.getenv("CORS_ORIGINS")
+    if cors_origins_str:
+        try:
+            return json.loads(cors_origins_str)
+        except json.JSONDecodeError:
+            print(f"⚠️ Invalid CORS_ORIGINS format, using defaults")
+            return default_origins
+
+    return default_origins
 
 # Add CORS middleware
 app.add_middleware(
