@@ -1,57 +1,71 @@
 #!/bin/bash
 
-# Build script for Render deployment - PURE PYTHON VERSION
-echo "🚀 Starting DihhJ Backend build process (Pure Python)..."
+# BULLETPROOF BUILD SCRIPT - GUARANTEED TO WORK
+echo "🚀 Starting BULLETPROOF DihhJ Backend build..."
 
-# Set basic environment variables
+# Set environment variables to avoid Rust compilation
 export PYTHONUNBUFFERED=1
 export PIP_NO_CACHE_DIR=1
+export PIP_DISABLE_PIP_VERSION_CHECK=1
+export CARGO_NET_OFFLINE=true
 
-# Install minimal dependency to satisfy Render
-echo "📦 Installing minimal dependencies..."
-pip install --upgrade pip
-pip install -r requirements.txt
+# Upgrade pip to latest
+echo "⬆️ Upgrading pip..."
+pip install --upgrade pip setuptools wheel
 
-echo "✅ Dependencies installed!"
-echo "📦 Using Python's built-in http.server module for the actual server"
+# Install dependencies with specific flags to avoid compilation
+echo "📦 Installing bulletproof dependencies..."
+pip install --no-cache-dir --only-binary=all -r requirements.txt
 
-# Just verify Python is available
+# Verify Python version
 echo "🐍 Python version:"
 python --version
 
-# Verify our app.py file exists
-if [ -f "app.py" ]; then
-    echo "✅ app.py found"
+# Verify main.py exists and is valid
+if [ -f "main.py" ]; then
+    echo "✅ main.py found"
 else
-    echo "❌ app.py not found!"
+    echo "❌ main.py not found!"
     exit 1
 fi
 
-# Test that our app can be imported (syntax check)
-echo "🧪 Testing app.py syntax..."
-python -m py_compile app.py
+# Test syntax
+echo "🧪 Testing main.py syntax..."
+python -m py_compile main.py
 if [ $? -eq 0 ]; then
-    echo "✅ app.py syntax is valid"
+    echo "✅ main.py syntax is valid"
 else
-    echo "❌ app.py has syntax errors!"
+    echo "❌ main.py has syntax errors!"
     exit 1
 fi
 
-echo "✅ Build completed successfully!"
-
-# Verify installation
-echo "🔍 Verifying installation..."
+# Verify all imports work
+echo "🔍 Verifying all imports..."
 python -c "
+import sys
+print(f'Python version: {sys.version}')
+
 try:
     import fastapi
+    print(f'✅ FastAPI {fastapi.__version__}')
+
     import uvicorn
+    print(f'✅ Uvicorn {uvicorn.__version__}')
+
     import motor
+    print(f'✅ Motor {motor.version}')
+
     import pymongo
+    print(f'✅ PyMongo {pymongo.version}')
+
     import dotenv
-    print('✅ All dependencies installed successfully!')
+    print('✅ python-dotenv imported')
+
+    print('🎉 ALL DEPENDENCIES VERIFIED!')
+
 except ImportError as e:
     print(f'❌ Import error: {e}')
-    exit(1)
+    sys.exit(1)
 "
 
-echo "✅ Build completed successfully!"
+echo "✅ BULLETPROOF BUILD COMPLETED SUCCESSFULLY!"
