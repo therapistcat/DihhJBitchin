@@ -1,0 +1,2 @@
+# EMERGENCY - No dependencies at all
+# Pure Python HTTP server
