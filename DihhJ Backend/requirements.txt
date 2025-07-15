@@ -1,1 +1,3 @@
-# No dependencies - using pure Python HTTP server
+# Minimal dependency to satisfy Render build process
+# Our app.py uses pure Python, but this helps with deployment
+setuptools
