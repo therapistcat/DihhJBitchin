@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from schemas.user_schemas import UserLogin, UserOut, UserResponse
-from database import user_collection
+from database import user_collection, run_sync
 from utils.hashing import verify_password
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -14,7 +14,7 @@ async def login(user: UserLogin):
     - **password**: Your password
     """
     # Find user in database
-    user_data = await user_collection.find_one({"username": user.username})
+    user_data = await run_sync(user_collection.find_one, {"username": user.username})
 
     # Check if user exists and password is correct
     if not user_data or not verify_password(user.password, user_data["password"]):

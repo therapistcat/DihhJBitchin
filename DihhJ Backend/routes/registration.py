@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from schemas.user_schemas import UserCreate, UserOut, UserResponse
-from database import user_collection
+from database import user_collection, run_sync
 from utils.hashing import hash_password
 from pymongo.errors import DuplicateKeyError
 
@@ -16,7 +16,7 @@ async def register_user(user: UserCreate):
     - **year**: Must be one of: 26, 27, 28, 29 (graduation year)
     """
     # Check if username already exists
-    existing_user = await user_collection.find_one({"username": user.username})
+    existing_user = await run_sync(user_collection.find_one, {"username": user.username})
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -32,7 +32,7 @@ async def register_user(user: UserCreate):
 
     # Insert user into database
     try:
-        result = await user_collection.insert_one(user_dict)
+        result = await run_sync(user_collection.insert_one, user_dict)
     except DuplicateKeyError:
         # This handles the case where the unique index catches a duplicate username
         # that might have been inserted between our check and insert

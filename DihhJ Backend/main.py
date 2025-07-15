@@ -26,7 +26,7 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# Startup and shutdown events (compatible with older FastAPI)
+# Startup and shutdown events (compatible with newer FastAPI)
 @app.on_event("startup")
 async def startup_event():
     print("🚀 Starting DihhJ Backend...")

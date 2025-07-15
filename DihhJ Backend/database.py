@@ -1,6 +1,7 @@
 import os
 import urllib.parse
-from motor.motor_asyncio import AsyncIOMotorClient
+import asyncio
+from pymongo import MongoClient
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -24,7 +25,7 @@ def get_mongodb_url():
 MONGODB_URL = get_mongodb_url()
 DATABASE_NAME = os.getenv("DATABASE_NAME", "dihhj_backend")
 
-# MongoDB client configuration (simplified for older pymongo)
+# MongoDB client configuration (simplified for compatibility)
 client_options = {
     "maxPoolSize": 10,
     "minPoolSize": 1,
@@ -36,9 +37,9 @@ client_options = {
     "w": "majority"
 }
 
-# Create MongoDB client
+# Create MongoDB client (synchronous)
 try:
-    client = AsyncIOMotorClient(MONGODB_URL, **client_options)
+    client = MongoClient(MONGODB_URL, **client_options)
 except Exception as e:
     print(f"❌ Error creating MongoDB client: {e}")
     raise
@@ -53,14 +54,20 @@ bitch_collection = database.get_collection("bitches")
 tea_votes_collection = database.get_collection("tea_votes")
 bitch_votes_collection = database.get_collection("bitch_votes")
 
+# Async wrapper for synchronous operations
+async def run_sync(func, *args, **kwargs):
+    """Run synchronous function in thread pool"""
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, func, *args, **kwargs)
+
 # Test connection function
 async def test_connection():
     try:
         # Test the connection with timeout
-        await client.admin.command('ping')
+        await run_sync(client.admin.command, 'ping')
 
         # Test database access
-        await database.list_collection_names()
+        await run_sync(database.list_collection_names)
 
         print("✅ Successfully connected to MongoDB!")
         print(f"📊 Connected to database: {DATABASE_NAME}")
@@ -74,7 +81,7 @@ async def test_connection():
 async def initialize_indexes():
     try:
         # Create unique index on username field
-        await user_collection.create_index("username", unique=True)
+        await run_sync(user_collection.create_index, "username", unique=True)
         print("✅ Database indexes initialized successfully!")
         return True
     except Exception as e:
@@ -83,5 +90,5 @@ async def initialize_indexes():
 
 # Close connection function
 async def close_connection():
-    client.close()
+    await run_sync(client.close)
     print("🔌 MongoDB connection closed")
