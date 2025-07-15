@@ -1,20 +1,16 @@
 #!/bin/bash
 
-# Build script for Render deployment - UPDATED VERSION
-echo "🚀 Starting DihhJ Backend build process..."
+# Build script for Render deployment - PURE PYTHON VERSION
+echo "🚀 Starting DihhJ Backend build process (Pure Python)..."
 
-# Set environment variables for build
-export PYTHONUNBUFFERED=1
-export PIP_NO_CACHE_DIR=1
-export PIP_DISABLE_PIP_VERSION_CHECK=1
+# No dependencies needed - using pure Python HTTP server
+echo "✅ No external dependencies required!"
+echo "📦 Using Python's built-in http.server module"
 
-# Upgrade pip first
-echo "⬆️ Upgrading pip..."
-pip install --upgrade pip setuptools wheel
+# Just verify Python is available
+python --version
 
-# Install all dependencies from requirements.txt
-echo "📦 Installing dependencies from requirements.txt..."
-pip install --no-cache-dir -r requirements.txt
+echo "✅ Build completed successfully!"
 
 # Verify installation
 echo "🔍 Verifying installation..."

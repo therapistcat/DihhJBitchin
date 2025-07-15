@@ -2,7 +2,6 @@ import os
 import json
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
 import uvicorn
 from dotenv import load_dotenv
 
@@ -19,27 +18,26 @@ from routes.bitch import router as bitch_router
 # Import database functions
 from database import test_connection, close_connection, initialize_indexes
 
-# Lifespan context manager for startup and shutdown events
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Startup
-    print("🚀 Starting DihhJ Backend...")
-    await test_connection()
-    await initialize_indexes()
-    yield
-    # Shutdown
-    print("🛑 Shutting down DihhJ Backend...")
-    await close_connection()
-
 # Create FastAPI app
 app = FastAPI(
     title="DihhJ Backend API",
     description="A FastAPI backend for DihhJ Bitchers - Tea & Drama Platform",
     version="1.0.0",
-    lifespan=lifespan,
     docs_url="/docs" if os.getenv("ENVIRONMENT") != "production" else None,
     redoc_url="/redoc" if os.getenv("ENVIRONMENT") != "production" else None,
 )
+
+# Startup and shutdown events (compatible with older FastAPI)
+@app.on_event("startup")
+async def startup_event():
+    print("🚀 Starting DihhJ Backend...")
+    await test_connection()
+    await initialize_indexes()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    print("🛑 Shutting down DihhJ Backend...")
+    await close_connection()
 
 # Configure CORS origins
 def get_cors_origins():
