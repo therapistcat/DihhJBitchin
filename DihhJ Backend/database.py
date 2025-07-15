@@ -1,7 +1,6 @@
 import os
 import urllib.parse
 from motor.motor_asyncio import AsyncIOMotorClient
-from pymongo.server_api import ServerApi
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -25,9 +24,8 @@ def get_mongodb_url():
 MONGODB_URL = get_mongodb_url()
 DATABASE_NAME = os.getenv("DATABASE_NAME", "dihhj_backend")
 
-# MongoDB client configuration
+# MongoDB client configuration (simplified for older pymongo)
 client_options = {
-    "server_api": ServerApi('1'),
     "maxPoolSize": 10,
     "minPoolSize": 1,
     "maxIdleTimeMS": 30000,

@@ -13,7 +13,6 @@ from routes.registration import router as registration_router
 from routes.login import router as login_router
 from routes.tea import router as tea_router
 from routes.bitch import router as bitch_router
-# from routes.images import router as images_router  # Temporarily commented out
 
 # Import database functions
 from database import test_connection, close_connection, initialize_indexes
@@ -23,8 +22,8 @@ app = FastAPI(
     title="DihhJ Backend API",
     description="A FastAPI backend for DihhJ Bitchers - Tea & Drama Platform",
     version="1.0.0",
-    docs_url="/docs" if os.getenv("ENVIRONMENT") != "production" else None,
-    redoc_url="/redoc" if os.getenv("ENVIRONMENT") != "production" else None,
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
 # Startup and shutdown events (compatible with older FastAPI)

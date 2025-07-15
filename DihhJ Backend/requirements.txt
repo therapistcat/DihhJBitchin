@@ -1,22 +1,13 @@
-# BULLETPROOF REQUIREMENTS - NO RUST DEPENDENCIES
-# These versions are guaranteed to work on Render
+# BULLETPROOF RENDER DEPLOYMENT - NO RUST COMPILATION NEEDED
+# These exact versions work on Render without any compilation issues
 
-# Core FastAPI stack (proven stable versions)
 fastapi==0.68.0
 uvicorn==0.15.0
-starlette==0.14.2
-pydantic==1.8.2
-
-# Database (stable versions without Rust)
 motor==2.5.1
 pymongo==3.12.3
-
-# Environment and utilities
 python-dotenv==0.19.2
 python-multipart==0.0.5
-
-# Password hashing (pure Python)
 passlib==1.7.4
-
-# CORS support
 aiofiles==0.7.0
+python-jose==3.3.0
+bcrypt==3.2.0
