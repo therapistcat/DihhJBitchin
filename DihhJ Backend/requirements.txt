@@ -1,3 +1,21 @@
-# Minimal dependency to satisfy Render build process
-# Our app.py uses pure Python, but this helps with deployment
-setuptools
+# FastAPI and ASGI server
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# Database
+motor==3.3.2
+pymongo==4.6.0
+
+# Environment and configuration
+python-dotenv==1.0.0
+
+# Additional utilities
+python-multipart==0.0.6
+pydantic==2.5.0
+
+# For password hashing (if used)
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+
+# For file uploads (if needed)
+aiofiles==23.2.0
