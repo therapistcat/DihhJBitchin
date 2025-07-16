@@ -1,8 +1,0 @@
-# ULTRA MINIMAL - No Rust dependencies whatsoever
-fastapi==0.68.0
-uvicorn==0.15.0
-starlette==0.14.2
-pydantic==1.8.2
-click==8.0.4
-h11==0.12.0
-typing-extensions==4.1.1

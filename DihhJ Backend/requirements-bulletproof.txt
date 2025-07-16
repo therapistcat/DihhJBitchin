@@ -1,8 +1,0 @@
-# ABSOLUTE BULLETPROOF REQUIREMENTS
-# These are the MINIMUM packages needed and are guaranteed to work
-
-fastapi==0.68.0
-uvicorn==0.15.0
-motor==2.5.1
-pymongo==3.12.3
-python-dotenv==0.19.2

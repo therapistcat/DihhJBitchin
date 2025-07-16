@@ -1,239 +1,232 @@
-# DihhJ Backend - Reddit-like Tea Sharing Platform 🍵
+# DihhJ Backend
 
-A FastAPI-based backend for a Reddit-like platform where users can share "tea" (stories/posts) with advanced features like voting, commenting, tagging, and batch-based communities.
+A Node.js backend for DihhJ Bitchers - A tea blog platform where users can share tea posts, vote, and comment.
 
 ## 🚀 Features
 
-### Core Features
-- **User Authentication**: Registration and login system with batch-based organization
-- **Tea Posts**: Create, read, update, delete tea posts (like Reddit posts)
-- **Voting System**: Upvote/downvote tea posts and comments (Reddit-style)
-- **Nested Comments**: Threaded comment system called "bitch" comments
-- **Batch-based Communities**: Separate spaces for different batches (25, 26, 27, 28, 29)
-- **Advanced Tagging**: Rich tagging system with 20+ predefined categories
-- **Image Support**: Optional image uploads for tea posts
-- **Search & Filtering**: Search posts and filter by tags, batch, etc.
+- **User Authentication**: Registration and login system
+- **Tea Posts**: Create, read, update, and delete tea posts
+- **Voting System**: Upvote/downvote tea posts and comments
+- **Comments (Bitchin)**: Comment on tea posts with voting
+- **Tags & Batches**: Organize posts with tags and batch numbers
+- **MongoDB Integration**: Persistent data storage
+- **CORS Enabled**: Ready for frontend integration
+- **Rate Limiting**: Protection against spam
+- **Security**: Helmet, bcrypt password hashing
 
-### Reddit-like Features
-- **Hot/New/Top Sorting**: Multiple sorting algorithms
-- **Score System**: Upvotes - downvotes scoring
-- **Comment Threading**: Nested replies with depth tracking
-- **Trending Tags**: Track popular tags over time
-- **Batch Statistics**: View activity stats for each batch
+## 📋 API Endpoints
 
-## 📋 Available Tags
+### Authentication
+- `POST /auth/register` - Register new user
+- `POST /auth/login` - User login
+- `GET /auth/profile/:username` - Get user profile
 
-The platform includes a comprehensive tagging system:
+### Tea Posts
+- `GET /tea/list` - Get paginated tea posts with filtering
+- `POST /tea/create?username={username}` - Create new tea post
+- `GET /tea/:id` - Get specific tea post
+- `POST /tea/:id/vote?username={username}` - Vote on tea post
+- `GET /tea/:id/user-vote?username={username}` - Get user's vote status
+- `GET /tea/tags` - Get available tags
+- `GET /tea/batches` - Get batch statistics
 
-- `general` - General discussions and everyday topics
-- `informative` - Educational or informative content
-- `hari-bitch` - Daily complaints and minor frustrations
-- `snitching-on-my-bestie` - Sharing secrets about friends (anonymously)
-- `drama` - Dramatic situations and conflicts
-- `confession` - Personal confessions and admissions
-- `advice` - Seeking or giving advice
-- `rant` - Venting and expressing frustrations
-- `funny` - Humorous content and jokes
-- `wholesome` - Positive and heartwarming content
-- `academic` - School, studies, and academic life
-- `relationship` - Dating, romance, and relationships
-- `family` - Family-related topics
-- `friends` - Friendship and social circles
-- `work` - Job and career-related topics
-- `life-update` - Personal life updates and milestones
-- `question` - Questions seeking answers
-- `discussion` - Open discussions and debates
-- `meme` - Memes and internet culture
-- `serious` - Serious and important topics
+### Comments (Bitchin)
+- `GET /bitch/:teaId/list` - Get comments for tea post
+- `POST /bitch/:teaId/create?username={username}` - Create comment
+- `PUT /bitch/comment/:commentId?username={username}` - Update comment
+- `DELETE /bitch/comment/:commentId?username={username}` - Delete comment
+- `POST /bitch/comment/:commentId/vote?username={username}&vote_type={type}` - Vote on comment
+- `GET /bitch/comment/:commentId/user-vote?username={username}` - Get user's comment vote
+- `GET /bitch/user/:username` - Get user's comments
 
-## Requirements
+### Health & Info
+- `GET /` - API information
+- `GET /health` - Health check
 
-- Python 3.8+
-- MongoDB (local or cloud)
-- Dependencies listed in `requirements.txt`
+## 🛠️ Setup
 
-## Installation
+### Prerequisites
+- Node.js 18+ 
+- MongoDB Atlas account
+- npm or yarn
 
-1. **Clone or navigate to the project directory**
+### Installation
+
+1. **Clone and navigate to backend directory**
    ```bash
    cd "DihhJ Backend"
    ```
 
-2. **Activate virtual environment** (if not already activated)
+2. **Install dependencies**
    ```bash
-   # Windows
-   venv\Scripts\activate
-   
-   # Linux/Mac
-   source venv/bin/activate
+   npm install
    ```
 
-3. **Install dependencies** (already installed based on requirements.txt)
+3. **Environment Configuration**
    ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Set up MongoDB**
-   - Install MongoDB locally, or
-   - Use MongoDB Atlas (cloud), or
-   - Use Docker: `docker run -d -p 27017:27017 mongo`
-
-5. **Configure environment variables**
-   - Edit `.env` file if needed
-   - Default MongoDB URL: `mongodb://localhost:27017`
-   - Default database name: `dihhj_backend`
-
-## Running the Application
-
-1. **Start the API server**
-   ```bash
-   python main.py
+   cp .env.example .env
    ```
    
-   Or using uvicorn directly:
-   ```bash
-   uvicorn main:app --reload --host 0.0.0.0 --port 8000
+   Edit `.env` and add your MongoDB password:
+   ```env
+   MONGODB_URL=mongodb+srv://chulbuleMishraJi:<db_password>@chulbulemishraji.8mcwh5g.mongodb.net/?retryWrites=true&w=majority&appName=chulbuleMishraJi
+   DB_PASSWORD=your_actual_mongodb_password
    ```
 
-2. **Access the API**
-   - API Base URL: http://localhost:8000
-   - Interactive API Docs: http://localhost:8000/docs
-   - Alternative Docs: http://localhost:8000/redoc
+4. **Start the server**
+   ```bash
+   # Development
+   npm run dev
+   
+   # Production
+   npm start
+   ```
 
-## API Endpoints
+5. **Test the API**
+   ```bash
+   npm test
+   ```
 
-### Root Endpoints
-- `GET /` - API information and health check
-- `GET /health` - Health check endpoint
+## 🌐 Deployment
 
-### Authentication Endpoints
-- `POST /auth/register` - Register a new user
-- `POST /auth/login` - Login with existing credentials
+### Render Deployment
 
-## API Usage Examples
+1. **Connect your repository** to Render
+2. **Set environment variables** in Render dashboard:
+   - `NODE_ENV=production`
+   - `MONGODB_URL=your_mongodb_connection_string`
+   - `DB_PASSWORD=your_mongodb_password`
+   - `DATABASE_NAME=dihhj_backend`
+   - `CORS_ORIGINS=https://dihhjbitchin-ido5.onrender.com`
 
-### Register a New User
-```bash
-curl -X POST "http://localhost:8000/auth/register" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "username": "john_doe",
-       "password": "securepassword123",
-       "year": "27"
-     }'
-```
+3. **Deploy** - Render will automatically build and deploy
 
-### Login
-```bash
-curl -X POST "http://localhost:8000/auth/login" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "username": "john_doe",
-       "password": "securepassword123"
-     }'
-```
+### Environment Variables
 
-## Data Validation
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `MONGODB_URL` | MongoDB connection string | Required |
+| `DB_PASSWORD` | MongoDB password | Required |
+| `DATABASE_NAME` | Database name | `dihhj_backend` |
+| `PORT` | Server port | `8000` |
+| `NODE_ENV` | Environment | `development` |
+| `CORS_ORIGINS` | Allowed origins (comma-separated) | localhost + frontend URL |
+| `BCRYPT_ROUNDS` | Password hashing rounds | `12` |
 
-### Registration Requirements
-- **Username**: 3-50 characters, must be unique
-- **Password**: Minimum 6 characters
-- **Year**: Must be one of: 26, 27, 28, 29 (graduation year)
+## 🗄️ Database Schema
 
-### Response Format
-All endpoints return JSON responses with consistent structure:
-```json
+### Collections
+
+#### Users
+```javascript
 {
-  "message": "Success message",
-  "user": {
-    "username": "john_doe",
-    "year": "27",
-    "id": "507f1f77bcf86cd799439011"
-  }
+  _id: ObjectId,
+  username: String (lowercase, unique),
+  originalUsername: String (display name),
+  password: String (hashed),
+  year: Number,
+  created_at: Date,
+  updated_at: Date,
+  last_login: Date
 }
 ```
 
-## Testing
-
-Run the test script to verify all endpoints:
-```bash
-python test_api.py
+#### Teas
+```javascript
+{
+  _id: ObjectId,
+  title: String,
+  content: String,
+  tag: String,
+  batch: String,
+  author: String,
+  upvotes: Number,
+  downvotes: Number,
+  score: Number,
+  created_at: Date,
+  updated_at: Date
+}
 ```
 
-## Project Structure
+#### Votes
+```javascript
+{
+  _id: ObjectId,
+  user_id: String,
+  tea_id: String,
+  vote_type: String ('upvote' | 'downvote'),
+  created_at: Date,
+  updated_at: Date
+}
+```
 
+#### Comments
+```javascript
+{
+  _id: ObjectId,
+  content: String,
+  author: String,
+  tea_id: String,
+  upvotes: Number,
+  downvotes: Number,
+  score: Number,
+  created_at: Date,
+  updated_at: Date
+}
+```
+
+#### Comment Votes
+```javascript
+{
+  _id: ObjectId,
+  user_id: String,
+  comment_id: String,
+  vote_type: String ('upvote' | 'downvote'),
+  created_at: Date,
+  updated_at: Date
+}
+```
+
+## 🔧 Development
+
+### Available Scripts
+- `npm start` - Start production server
+- `npm run dev` - Start development server with nodemon
+- `npm test` - Run API tests
+
+### Project Structure
 ```
 DihhJ Backend/
-├── main.py                 # FastAPI application entry point
-├── database.py             # MongoDB connection and configuration
-├── .env                    # Environment variables
-├── requirements.txt        # Python dependencies
-├── test_api.py            # API testing script
+├── config/
+│   └── database.js      # MongoDB connection
 ├── routes/
-│   ├── registration.py    # User registration endpoint
-│   └── login.py          # User login endpoint
-├── schemas/
-│   └── user_schemas.py   # Pydantic models for validation
-└── utils/
-    └── hashing.py        # Password hashing utilities
+│   ├── auth.js          # Authentication routes
+│   ├── tea.js           # Tea post routes
+│   └── bitch.js         # Comment routes
+├── server.js            # Main server file
+├── test.js              # API test suite
+├── package.json         # Dependencies
+├── .env                 # Environment variables
+└── README.md           # This file
 ```
 
-## Database Schema
+## 🎯 Frontend Integration
 
-### Users Collection
-```json
-{
-  "_id": "ObjectId",
-  "username": "string (unique)",
-  "password": "string (hashed)",
-  "year": "string (26|27|28|29)"
-}
-```
+This backend is designed to work with the DihhJ frontend at:
+- **Development**: `http://localhost:3000`
+- **Production**: `https://dihhjbitchin-ido5.onrender.com`
 
-## Security Features
+The API endpoints match exactly what the frontend expects, ensuring seamless integration.
 
-- ✅ Password hashing with bcrypt
-- ✅ Input validation and sanitization
-- ✅ Proper HTTP status codes
-- ✅ Error handling without exposing sensitive information
+## 🔒 Security Features
 
-## Development
+- **CORS Protection**: Configured for specific origins
+- **Rate Limiting**: 100 requests per 15 minutes per IP
+- **Helmet**: Security headers
+- **Password Hashing**: bcrypt with 12 rounds
+- **Input Validation**: Comprehensive request validation
+- **Error Handling**: Secure error responses
 
-- The API runs with auto-reload enabled in development mode
-- MongoDB connection is tested on startup
-- Comprehensive error handling and logging
-- CORS enabled for frontend integration
+## 📝 License
 
-## 🚀 Deployment on Render
-
-### Environment Variables Required:
-Set these in your Render dashboard:
-
-```
-ENVIRONMENT=production
-MONGODB_URL=mongodb+srv://chulbuleMishraJi:<db_password>@chulbulemishraJi.8mcwh5g.mongodb.net/
-DB_PASSWORD=your_mongodb_atlas_password
-DATABASE_NAME=dihhj_backend
-CORS_ORIGINS=["https://dihhjbitchin-ido5.onrender.com"]
-```
-
-### Deployment Steps:
-1. Connect your GitHub repo to Render
-2. Set build command: `./build.sh`
-3. Set start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-4. Add environment variables above
-5. Deploy!
-
-### Frontend Integration
-Frontend is deployed at: https://dihhjbitchin-ido5.onrender.com
-Backend CORS is configured to allow requests from this domain.
-
-## Next Steps (Optional Enhancements)
-
-- [ ] JWT token authentication
-- [ ] User sessions management
-- [ ] Password reset functionality
-- [ ] Email verification
-- [ ] Rate limiting
-- [ ] API versioning
-- [ ] Unit tests with pytest
+MIT License - Feel free to use this project for your own purposes.
