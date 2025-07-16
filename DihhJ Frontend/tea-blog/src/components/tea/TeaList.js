@@ -10,11 +10,8 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
   const [lastRefresh, setLastRefresh] = useState(Date.now());
-  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
-  const [newPostsAvailable, setNewPostsAvailable] = useState(false);
 
   const loadTeas = async (isLoadMore = false) => {
-    console.log('🔥 LOADING TEAS CALLED!', { isLoadMore, filters });
     try {
       const currentPage = isLoadMore ? page : 0;
       const params = {
@@ -23,12 +20,11 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
         ...filters
       };
 
-      console.log('🔥 API call params:', params);
-      console.log('🔥 About to call teaAPI.getTeaPosts...');
       const response = await teaAPI.getTeaPosts(params);
-      console.log('🔥 API response received:', response);
+      console.log('🔥 TEA API RESPONSE:', response);
 
       if (response && response.teas) {
+        console.log('✅ Found teas:', response.teas.length);
         if (isLoadMore) {
           setTeas(prev => [...prev, ...response.teas]);
         } else {
@@ -37,9 +33,8 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
 
         setHasMore(response.teas.length === 10);
         setPage(currentPage + 1);
-        console.log('Teas loaded successfully:', response.teas.length);
       } else {
-        console.warn('No teas in response:', response);
+        console.log('❌ No teas found in response');
         setTeas([]);
       }
     } catch (error) {
@@ -47,7 +42,6 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
       setError(`Failed to load tea posts: ${error.message}`);
     } finally {
       setLoading(false);
-      console.log('Loading finished');
     }
   };
 
@@ -55,65 +49,9 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
     setLoading(true);
     setError('');
     setPage(0);
-    setNewPostsAvailable(false);
     loadTeas(false);
     setLastRefresh(Date.now());
   }, [filters, refreshTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Auto-refresh mechanism
-  useEffect(() => {
-    if (!autoRefreshEnabled) return;
-
-    const checkForNewPosts = async () => {
-      try {
-        // Only check if we're on the first page and not currently loading
-        if (page > 0 || loading) return;
-
-        const params = {
-          skip: 0,
-          limit: 1, // Just check if there's a newer post
-          ...filters
-        };
-
-        const response = await teaAPI.getTeaPosts(params);
-        if (response && response.teas && response.teas.length > 0) {
-          const latestPost = response.teas[0];
-          const latestPostTime = new Date(latestPost.created_at).getTime();
-
-          // If there's a newer post than our last refresh, show notification
-          if (latestPostTime > lastRefresh && teas.length > 0) {
-            setNewPostsAvailable(true);
-          }
-        }
-      } catch (error) {
-        console.error('Error checking for new posts:', error);
-      }
-    };
-
-    // Check for new posts every 30 seconds
-    const interval = setInterval(checkForNewPosts, 30000);
-
-    return () => clearInterval(interval);
-  }, [autoRefreshEnabled, page, loading, filters, lastRefresh, teas.length]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Auto-refresh every 5 minutes if enabled
-  useEffect(() => {
-    if (!autoRefreshEnabled) return;
-
-    const autoRefresh = () => {
-      // Only auto-refresh if user is on first page and not actively loading
-      if (page === 0 && !loading) {
-        console.log('Auto-refreshing tea posts...');
-        loadTeas(false);
-        setLastRefresh(Date.now());
-        setNewPostsAvailable(false);
-      }
-    };
-
-    const interval = setInterval(autoRefresh, 5 * 60 * 1000); // 5 minutes
-
-    return () => clearInterval(interval);
-  }, [autoRefreshEnabled, page, loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLoadMore = () => {
     if (!loading && hasMore) {
@@ -126,7 +64,6 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
     // For simplicity, we'll refresh the entire list
     loadTeas(false);
     setLastRefresh(Date.now());
-    setNewPostsAvailable(false);
   };
 
   const handleManualRefresh = () => {
@@ -135,16 +72,9 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
     setPage(0);
     loadTeas(false);
     setLastRefresh(Date.now());
-    setNewPostsAvailable(false);
   };
 
-  const toggleAutoRefresh = () => {
-    setAutoRefreshEnabled(!autoRefreshEnabled);
-  };
 
-  const handleNewPostsClick = () => {
-    handleManualRefresh();
-  };
 
   if (loading && teas.length === 0) {
     return (
@@ -186,23 +116,20 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
 
   return (
     <div className="tea-list-container">
-      {/* New Posts Notification */}
-      {newPostsAvailable && (
-        <div className="new-posts-notification">
-          <div className="notification-content">
-            <span className="notification-icon">✨</span>
-            <span className="notification-text">New tea posts available!</span>
-            <button
-              onClick={handleNewPostsClick}
-              className="refresh-btn"
-            >
-              🔄 Refresh
-            </button>
+      {/* Debug Info */}
+      <div style={{ padding: '10px', backgroundColor: '#2a2a2a', color: 'white', marginBottom: '10px' }}>
+        <strong>🔥 DEBUG INFO:</strong><br/>
+        Teas loaded: {teas.length}<br/>
+        Loading: {loading ? 'Yes' : 'No'}<br/>
+        Error: {error || 'None'}<br/>
+        {teas.length > 0 && (
+          <div>
+            First tea: {teas[0].title}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Refresh Controls */}
+      {/* Manual Refresh Button */}
       <div className="refresh-controls">
         <button
           onClick={handleManualRefresh}
@@ -213,26 +140,31 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
           <span className={`refresh-icon ${loading ? 'spinning' : ''}`}>🔄</span>
           Refresh
         </button>
-
-        <button
-          onClick={toggleAutoRefresh}
-          className={`auto-refresh-toggle ${autoRefreshEnabled ? 'active' : ''}`}
-          title={`Auto-refresh is ${autoRefreshEnabled ? 'enabled' : 'disabled'}`}
-        >
-          <span className="toggle-icon">{autoRefreshEnabled ? '🔄' : '⏸️'}</span>
-          Auto-refresh {autoRefreshEnabled ? 'ON' : 'OFF'}
-        </button>
       </div>
 
       <div className="tea-list">
-        {teas.map(tea => (
-          <TeaCard
-            key={tea.id}
-            tea={tea}
-            onTeaUpdate={handleTeaUpdate}
-            onTeaClick={onTeaClick}
-          />
-        ))}
+        {teas.length > 0 ? (
+          teas.map(tea => (
+            <div key={tea.id} style={{
+              padding: '20px',
+              margin: '10px',
+              backgroundColor: '#333',
+              color: 'white',
+              borderRadius: '8px'
+            }}>
+              <h3>🔥 {tea.title}</h3>
+              <p>{tea.content}</p>
+              <small>By: {tea.author} | Batch: {tea.batch} | Tag: {tea.tag}</small>
+              <br/>
+              <small>👍 {tea.upvotes} | 👎 {tea.downvotes} | Score: {tea.score}</small>
+            </div>
+          ))
+        ) : (
+          <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+            <h3>No tea posts found</h3>
+            <p>Click refresh to load posts</p>
+          </div>
+        )}
       </div>
 
       {hasMore && (

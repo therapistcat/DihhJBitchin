@@ -28,6 +28,7 @@ const Login = ({ onSwitchToRegister, onClose }) => {
 
     try {
       const response = await authAPI.login(formData);
+
       if (response.user) {
         login(response.user);
         onClose();
@@ -36,8 +37,12 @@ const Login = ({ onSwitchToRegister, onClose }) => {
       }
     } catch (error) {
       console.error('Login error:', error);
-      if (error.response?.data?.detail) {
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else if (error.response?.data?.detail) {
         setError(error.response.data.detail);
+      } else if (error.message) {
+        setError(error.message);
       } else {
         setError('Login failed. Please check your credentials and try again.');
       }

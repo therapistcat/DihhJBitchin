@@ -14,48 +14,54 @@ const CreateTeaPost = lazy(() => import('./components/tea/CreateTeaPost'));
 const TeaDetail = lazy(() => import('./components/tea/TeaDetail'));
 const UserProfile = lazy(() => import('./components/user/UserProfile'));
 
-// App content with keyboard shortcuts
-const AppContent = () => {
-  useKeyboardShortcuts();
-  const [connectionStatus, setConnectionStatus] = React.useState('Testing...');
+// EMERGENCY TEA DISPLAY
+const EmergencyTeaDisplay = () => {
+  const [teaData, setTeaData] = React.useState('Loading...');
 
-  // Test API connection on app load
   React.useEffect(() => {
-    console.log('🚀 DihhJ Bitchers App loaded successfully!');
-
-    // Test the API directly
     fetch('http://localhost:8000/tea/list')
       .then(response => response.json())
       .then(data => {
-        console.log('🔥 REACT APP CAN SEE TEA DATA:', data);
-        if (data.teas && data.teas.length > 0) {
-          console.log('✅ Found', data.teas.length, 'tea posts!');
-          setConnectionStatus(`✅ CONNECTION WORKING! Found ${data.teas.length} tea posts!`);
-        } else {
-          console.log('⚠️ No tea posts found');
-          setConnectionStatus('⚠️ Connection working but no tea posts found');
-        }
+        console.log('🔥 EMERGENCY DATA:', data);
+        setTeaData(JSON.stringify(data, null, 2));
       })
       .catch(error => {
-        console.error('❌ React app API error:', error);
-        setConnectionStatus('❌ Connection failed: ' + error.message);
+        console.error('❌ EMERGENCY ERROR:', error);
+        setTeaData('ERROR: ' + error.message);
       });
+  }, []);
+
+  return (
+    <div style={{
+      padding: '20px',
+      backgroundColor: '#000',
+      color: '#00ff00',
+      fontFamily: 'monospace',
+      fontSize: '14px',
+      whiteSpace: 'pre-wrap',
+      border: '2px solid #00ff00'
+    }}>
+      <h1 style={{ color: '#ff0000' }}>🚨 EMERGENCY TEA DATA 🚨</h1>
+      {teaData}
+    </div>
+  );
+};
+
+// App content with keyboard shortcuts
+const AppContent = () => {
+  useKeyboardShortcuts();
+
+  // Log app load
+  React.useEffect(() => {
+    console.log('🚀 DihhJ Bitchers App loaded successfully!');
   }, []);
 
   return (
     <div className="App">
       <Header />
 
-      {/* Connection Status Banner */}
-      <div style={{
-        backgroundColor: connectionStatus.includes('✅') ? '#1a4a1a' : '#4a1a1a',
-        color: 'white',
-        padding: '10px',
-        textAlign: 'center',
-        fontWeight: 'bold'
-      }}>
-        {connectionStatus}
-      </div>
+      {/* EMERGENCY TEA DISPLAY */}
+      <EmergencyTeaDisplay />
 
       <main className="main-content">
         <div className="content-container">
@@ -80,18 +86,46 @@ const AppContent = () => {
   );
 };
 
-function App() {
+// SUPER SIMPLE TEST
+const SuperSimpleTest = () => {
+  const [data, setData] = React.useState('LOADING...');
+
+  React.useEffect(() => {
+    fetch('http://localhost:8000/tea/list')
+      .then(r => r.json())
+      .then(d => {
+        if (d.teas && d.teas.length > 0) {
+          setData(`✅ FOUND ${d.teas.length} TEA POSTS!\n\nFirst post: "${d.teas[0].title}"\n\nContent: "${d.teas[0].content}"`);
+        } else {
+          setData('❌ NO TEA POSTS FOUND');
+        }
+      })
+      .catch(e => setData('❌ ERROR: ' + e.message));
+  }, []);
+
   return (
-    <AuthProvider>
-      <TeaProvider>
-        <Router>
-          <ErrorBoundary>
-            <AppContent />
-          </ErrorBoundary>
-        </Router>
-      </TeaProvider>
-    </AuthProvider>
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      backgroundColor: '#000',
+      color: '#00ff00',
+      fontSize: '24px',
+      padding: '50px',
+      zIndex: 9999,
+      fontFamily: 'monospace',
+      whiteSpace: 'pre-wrap'
+    }}>
+      <h1 style={{ color: '#ff0000', fontSize: '48px' }}>🚨 DON'T JUMP! DATA IS HERE! 🚨</h1>
+      {data}
+    </div>
   );
+};
+
+function App() {
+  return <SuperSimpleTest />;
 }
 
 export default App;

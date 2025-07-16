@@ -57,10 +57,11 @@ const Register = ({ onSwitchToLogin, onClose }) => {
       const registrationData = {
         username: formData.username,
         password: formData.password,
-        year: formData.year
+        year: parseInt(formData.year) + 2000 // Convert "26" to 2026
       };
 
       const response = await authAPI.register(registrationData);
+
       if (response.user) {
         login(response.user);
         onClose();
@@ -69,8 +70,12 @@ const Register = ({ onSwitchToLogin, onClose }) => {
       }
     } catch (error) {
       console.error('Registration error:', error);
-      if (error.response?.data?.detail) {
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else if (error.response?.data?.detail) {
         setError(error.response.data.detail);
+      } else if (error.message) {
+        setError(error.message);
       } else {
         setError('Registration failed. Please try again.');
       }
