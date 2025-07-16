@@ -17,16 +17,45 @@ const UserProfile = lazy(() => import('./components/user/UserProfile'));
 // App content with keyboard shortcuts
 const AppContent = () => {
   useKeyboardShortcuts();
+  const [connectionStatus, setConnectionStatus] = React.useState('Testing...');
 
   // Test API connection on app load
   React.useEffect(() => {
     console.log('🚀 DihhJ Bitchers App loaded successfully!');
-    console.log('✅ Backend connection is working - check /test-direct.html for proof');
+
+    // Test the API directly
+    fetch('http://localhost:8000/tea/list')
+      .then(response => response.json())
+      .then(data => {
+        console.log('🔥 REACT APP CAN SEE TEA DATA:', data);
+        if (data.teas && data.teas.length > 0) {
+          console.log('✅ Found', data.teas.length, 'tea posts!');
+          setConnectionStatus(`✅ CONNECTION WORKING! Found ${data.teas.length} tea posts!`);
+        } else {
+          console.log('⚠️ No tea posts found');
+          setConnectionStatus('⚠️ Connection working but no tea posts found');
+        }
+      })
+      .catch(error => {
+        console.error('❌ React app API error:', error);
+        setConnectionStatus('❌ Connection failed: ' + error.message);
+      });
   }, []);
 
   return (
     <div className="App">
       <Header />
+
+      {/* Connection Status Banner */}
+      <div style={{
+        backgroundColor: connectionStatus.includes('✅') ? '#1a4a1a' : '#4a1a1a',
+        color: 'white',
+        padding: '10px',
+        textAlign: 'center',
+        fontWeight: 'bold'
+      }}>
+        {connectionStatus}
+      </div>
 
       <main className="main-content">
         <div className="content-container">

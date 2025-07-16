@@ -14,7 +14,7 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
   const [newPostsAvailable, setNewPostsAvailable] = useState(false);
 
   const loadTeas = async (isLoadMore = false) => {
-    console.log('Loading teas...', { isLoadMore, filters });
+    console.log('🔥 LOADING TEAS CALLED!', { isLoadMore, filters });
     try {
       const currentPage = isLoadMore ? page : 0;
       const params = {
@@ -23,9 +23,10 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
         ...filters
       };
 
-      console.log('API call params:', params);
+      console.log('🔥 API call params:', params);
+      console.log('🔥 About to call teaAPI.getTeaPosts...');
       const response = await teaAPI.getTeaPosts(params);
-      console.log('API response:', response);
+      console.log('🔥 API response received:', response);
 
       if (response && response.teas) {
         if (isLoadMore) {
