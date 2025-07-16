@@ -10,7 +10,9 @@ services:
       - key: NODE_ENV
         value: production
       - key: MONGODB_URL
-        value: mongodb+srv://chulbuleMishraJi:<db_password>@chulbulemishraji.8mcwh5g.mongodb.net/?retryWrites=true&w=majority&appName=chulbuleMishraJi
+        value: mongodb+srv://chulbuleMishraJi:Jivanshu1@chulbulemishraji.8mcwh5g.mongodb.net/?retryWrites=true&w=majority&appName=chulbuleMishraJi
+      - key: DB_PASSWORD
+        value: Jivanshu1
       - key: DATABASE_NAME
         value: dihhj_backend
       - key: CORS_ORIGINS
