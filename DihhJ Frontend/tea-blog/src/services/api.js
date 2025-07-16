@@ -2,16 +2,22 @@ import axios from 'axios';
 
 // Base API configuration
 const getApiBaseUrl = () => {
-  // Check if we're in production
-  if (process.env.NODE_ENV === 'production') {
-    // Use environment variable for production API URL
-    return process.env.REACT_APP_API_URL || 'https://dihhjbitchin-backend.onrender.com';
+  // Always use environment variable if set
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
   }
-  // Use localhost for development
-  return process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
+  // Use local backend in development, production backend in production
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:8000';
+  }
+
+  return 'https://dihhjbitchin-backend.onrender.com';
 };
 
 const API_BASE_URL = getApiBaseUrl();
+
+console.log('🔗 API Base URL:', API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -38,15 +44,28 @@ api.interceptors.request.use(
 // Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ API Response:', response.status, response.config.url);
+    }
     return response;
   },
   (error) => {
+    console.error('❌ API Error:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      message: error.message,
+      data: error.response?.data
+    });
+
     if (error.code === 'ECONNABORTED') {
       console.error('Request timeout - server might be starting up');
     } else if (error.response?.status === 500) {
       console.error('Server error - please try again later');
     } else if (!error.response) {
-      console.error('Network error - check your connection');
+      console.error('Network error - check your connection and CORS settings');
+    } else if (error.response?.status === 404) {
+      console.error('Endpoint not found - check API routes');
     }
     return Promise.reject(error);
   }

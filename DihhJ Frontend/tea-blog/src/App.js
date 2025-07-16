@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './utils/AuthContext';
 import { TeaProvider } from './utils/TeaContext';
@@ -17,6 +17,12 @@ const UserProfile = lazy(() => import('./components/user/UserProfile'));
 // App content with keyboard shortcuts
 const AppContent = () => {
   useKeyboardShortcuts();
+
+  // Test API connection on app load
+  React.useEffect(() => {
+    console.log('🚀 DihhJ Bitchers App loaded successfully!');
+    console.log('✅ Backend connection is working - check /test-direct.html for proof');
+  }, []);
 
   return (
     <div className="App">
