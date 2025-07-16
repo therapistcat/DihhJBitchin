@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Backend Connection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background-color: #2a2a2a;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #333;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success {
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            border-left: 4px solid #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <h1>DihhJ Backend Connection Test</h1>
+    
+    <div class="test-section">
+        <h3>1. Test Backend Health</h3>
+        <button onclick="testHealth()">Test Health Endpoint</button>
+        <div id="health-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Test Tea List</h3>
+        <button onclick="testTeaList()">Get Tea List</button>
+        <div id="tea-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Test User Registration</h3>
+        <button onclick="testRegister()">Test Registration</button>
+        <div id="register-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Test Create Tea</h3>
+        <button onclick="testCreateTea()">Create Test Tea</button>
+        <div id="create-result" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://dihhjbitchin-backend.onrender.com';
+
+        async function makeRequest(url, options = {}) {
+            try {
+                console.log('Making request to:', url);
+                const response = await fetch(url, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+                
+                const data = await response.json();
+                return { success: response.ok, data, status: response.status };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function testHealth() {
+            const result = document.getElementById('health-result');
+            result.textContent = 'Testing...';
+            
+            const response = await makeRequest(`${API_BASE}/health`);
+            
+            if (response.success) {
+                result.textContent = `✅ Success!\n${JSON.stringify(response.data, null, 2)}`;
+                result.className = 'result success';
+            } else {
+                result.textContent = `❌ Failed!\nStatus: ${response.status}\nError: ${response.error || JSON.stringify(response.data)}`;
+                result.className = 'result error';
+            }
+        }
+
+        async function testTeaList() {
+            const result = document.getElementById('tea-result');
+            result.textContent = 'Testing...';
+            
+            const response = await makeRequest(`${API_BASE}/tea/list`);
+            
+            if (response.success) {
+                result.textContent = `✅ Success!\n${JSON.stringify(response.data, null, 2)}`;
+                result.className = 'result success';
+            } else {
+                result.textContent = `❌ Failed!\nStatus: ${response.status}\nError: ${response.error || JSON.stringify(response.data)}`;
+                result.className = 'result error';
+            }
+        }
+
+        async function testRegister() {
+            const result = document.getElementById('register-result');
+            result.textContent = 'Testing...';
+            
+            const testUser = {
+                username: `testuser_${Date.now()}`,
+                password: 'testpass123',
+                year: 2025
+            };
+            
+            const response = await makeRequest(`${API_BASE}/auth/register`, {
+                method: 'POST',
+                body: JSON.stringify(testUser)
+            });
+            
+            if (response.success) {
+                result.textContent = `✅ Success!\n${JSON.stringify(response.data, null, 2)}`;
+                result.className = 'result success';
+            } else {
+                result.textContent = `❌ Failed!\nStatus: ${response.status}\nError: ${response.error || JSON.stringify(response.data)}`;
+                result.className = 'result error';
+            }
+        }
+
+        async function testCreateTea() {
+            const result = document.getElementById('create-result');
+            result.textContent = 'Testing...';
+            
+            const testTea = {
+                title: 'Test Tea Post',
+                content: 'This is a test tea post to verify the connection!',
+                tag: 'general'
+            };
+            
+            const response = await makeRequest(`${API_BASE}/tea/create?username=testuser`, {
+                method: 'POST',
+                body: JSON.stringify(testTea)
+            });
+            
+            if (response.success) {
+                result.textContent = `✅ Success!\n${JSON.stringify(response.data, null, 2)}`;
+                result.className = 'result success';
+            } else {
+                result.textContent = `❌ Failed!\nStatus: ${response.status}\nError: ${response.error || JSON.stringify(response.data)}`;
+                result.className = 'result error';
+            }
+        }
+
+        // Auto-test health on page load
+        window.onload = () => {
+            testHealth();
+        };
+    </script>
+</body>
+</html>

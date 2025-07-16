@@ -63,29 +63,7 @@ const Header = () => {
     }
   };
 
-  const testAPIConnection = async () => {
-    try {
-      // Use the same API base URL logic as the api.js service
-      const getApiBaseUrl = () => {
-        if (process.env.NODE_ENV === 'production') {
-          return process.env.REACT_APP_API_URL || 'https://your-backend-app.onrender.com';
-        }
-        return process.env.REACT_APP_API_URL || 'http://localhost:8000';
-      };
 
-      const apiUrl = getApiBaseUrl();
-      const response = await fetch(`${apiUrl}/health`);
-
-      if (response.ok) {
-        const data = await response.json();
-        alert(`🔥 Backend connection successful! Status: ${data.status} 🔥`);
-      } else {
-        alert('❌ Backend connection failed. Please check if the server is running.');
-      }
-    } catch (error) {
-      alert('❌ Cannot connect to backend. Please check your connection and server status.');
-    }
-  };
 
 
 
@@ -108,21 +86,6 @@ const Header = () => {
               <span className="brand-icon">◆</span>
             </h1>
             <p className="header-subtitle">Where the bitchin' never stops!</p>
-            <button
-              onClick={testAPIConnection}
-              style={{
-                background: 'var(--gradient-accent)',
-                color: 'white',
-                border: 'none',
-                padding: '4px 8px',
-                borderRadius: '8px',
-                fontSize: '10px',
-                cursor: 'pointer',
-                marginTop: '4px'
-              }}
-            >
-              Test API
-            </button>
           </div>
 
           {/* Navigation Controls */}

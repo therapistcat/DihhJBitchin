@@ -5,7 +5,7 @@ const getApiBaseUrl = () => {
   // Check if we're in production
   if (process.env.NODE_ENV === 'production') {
     // Use environment variable for production API URL
-    return process.env.REACT_APP_API_URL || 'https://your-backend-app.onrender.com';
+    return process.env.REACT_APP_API_URL || 'https://dihhjbitchin-backend.onrender.com';
   }
   // Use localhost for development
   return process.env.REACT_APP_API_URL || 'http://localhost:8000';

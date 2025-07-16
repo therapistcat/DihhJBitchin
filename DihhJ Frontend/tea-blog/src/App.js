@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './utils/AuthContext';
 import { TeaProvider } from './utils/TeaContext';
@@ -17,41 +17,6 @@ const UserProfile = lazy(() => import('./components/user/UserProfile'));
 // App content with keyboard shortcuts
 const AppContent = () => {
   useKeyboardShortcuts();
-  const [easterEggNotification, setEasterEggNotification] = React.useState(null);
-  const [konamiActive, setKonamiActive] = React.useState(false);
-
-  // Show in-site notification
-  const showEasterEgg = (message, type = 'default') => {
-    setEasterEggNotification({ message, type });
-    setTimeout(() => setEasterEggNotification(null), 4000);
-  };
-
-  // Konami Code Easter Egg
-  React.useEffect(() => {
-    const konamiCode = [
-      'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown',
-      'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight',
-      'KeyB', 'KeyA'
-    ];
-    let konamiIndex = 0;
-
-    const handleKonamiKey = (event) => {
-      if (event.code === konamiCode[konamiIndex]) {
-        konamiIndex++;
-        if (konamiIndex === konamiCode.length) {
-          setKonamiActive(true);
-          showEasterEgg('🎮 KONAMI CODE ACTIVATED! You\'re a true legend!', 'konami');
-          setTimeout(() => setKonamiActive(false), 8000);
-          konamiIndex = 0;
-        }
-      } else {
-        konamiIndex = 0;
-      }
-    };
-
-    document.addEventListener('keydown', handleKonamiKey);
-    return () => document.removeEventListener('keydown', handleKonamiKey);
-  }, []);
 
   return (
     <div className="App">
@@ -71,26 +36,10 @@ const AppContent = () => {
         </div>
       </main>
 
-
-
-      {/* Floating Interactive Element */}
-      <div
-        className="floating-interactive"
-        onClick={() => showEasterEgg('The eternal watcher sees all...', 'mystical')}
-        title="Click me for wisdom..."
-      >
-        ◈
-      </div>
-
-      {/* Easter Egg Notification */}
-      {easterEggNotification && (
-        <div className={`easter-notification ${easterEggNotification.type} ${konamiActive ? 'konami-active' : ''}`}>
-          <div className="notification-content">
-            {easterEggNotification.message}
-          </div>
-        </div>
-      )}
-
+      {/* Footer */}
+      <footer className="app-footer">
+        <p>#catchmeifyoucan</p>
+      </footer>
 
     </div>
   );

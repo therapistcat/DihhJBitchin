@@ -137,59 +137,106 @@ async def login_user(user: UserLogin):
     }
 
 # Create tea post
-@app.post("/tea", tags=["Tea"])
-async def create_tea(tea: TeaCreate):
+@app.post("/tea/create", tags=["Tea"])
+async def create_tea(tea: TeaCreate, username: str):
     tea_id = f"tea_{len(teas_db) + 1}"
-    
+
     teas_db[tea_id] = {
         "id": tea_id,
         "title": tea.title,
         "content": tea.content,
         "tag": tea.tag,
+        "author": username,
         "upvotes": 0,
         "downvotes": 0,
+        "score": 0,
         "created_at": datetime.utcnow().isoformat()
     }
-    
+
     return {
         "message": "Tea posted successfully!",
         "tea": teas_db[tea_id]
     }
 
-# Get all teas
-@app.get("/tea", tags=["Tea"])
-async def get_teas():
+# Get all teas (with list endpoint)
+@app.get("/tea/list", tags=["Tea"])
+async def get_teas(skip: int = 0, limit: int = 10, sort_by: str = "hot", order: str = "desc"):
     tea_list = list(teas_db.values())
-    # Sort by creation time (newest first)
-    tea_list.sort(key=lambda x: x["created_at"], reverse=True)
-    
+
+    # Sort by creation time (newest first) or by score for "hot"
+    if sort_by == "hot":
+        tea_list.sort(key=lambda x: x.get("score", 0), reverse=(order == "desc"))
+    else:
+        tea_list.sort(key=lambda x: x["created_at"], reverse=(order == "desc"))
+
+    # Apply pagination
+    paginated_teas = tea_list[skip:skip + limit]
+
     return {
-        "teas": tea_list,
+        "teas": paginated_teas,
         "total": len(tea_list)
     }
 
+# Keep the old endpoint for backward compatibility
+@app.get("/tea", tags=["Tea"])
+async def get_teas_old():
+    return await get_teas()
+
 # Vote on tea
 @app.post("/tea/{tea_id}/vote", tags=["Tea"])
-async def vote_tea(tea_id: str, vote: TeaVote):
+async def vote_tea(tea_id: str, username: str, vote_data: dict):
     if tea_id not in teas_db:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Tea not found"
         )
-    
-    if vote.vote_type == "upvote":
+
+    vote_type = vote_data.get("vote_type")
+    user_vote_key = f"{username}_{tea_id}"
+
+    # Remove previous vote if exists
+    if user_vote_key in votes_db:
+        prev_vote = votes_db[user_vote_key]
+        if prev_vote == "upvote":
+            teas_db[tea_id]["upvotes"] -= 1
+        elif prev_vote == "downvote":
+            teas_db[tea_id]["downvotes"] -= 1
+
+    # Add new vote
+    if vote_type == "upvote":
         teas_db[tea_id]["upvotes"] += 1
-    elif vote.vote_type == "downvote":
+        votes_db[user_vote_key] = "upvote"
+    elif vote_type == "downvote":
         teas_db[tea_id]["downvotes"] += 1
+        votes_db[user_vote_key] = "downvote"
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid vote type"
         )
-    
+
+    # Update score (upvotes - downvotes)
+    teas_db[tea_id]["score"] = teas_db[tea_id]["upvotes"] - teas_db[tea_id]["downvotes"]
+
     return {
         "message": "Vote recorded!",
         "tea": teas_db[tea_id]
+    }
+
+# Get user's vote status for a tea
+@app.get("/tea/{tea_id}/user-vote", tags=["Tea"])
+async def get_user_vote_status(tea_id: str, username: str):
+    if tea_id not in teas_db:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Tea not found"
+        )
+
+    user_vote_key = f"{username}_{tea_id}"
+    user_vote = votes_db.get(user_vote_key)
+
+    return {
+        "user_vote": user_vote
     }
 
 # Get tea by ID
@@ -200,8 +247,26 @@ async def get_tea(tea_id: str):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Tea not found"
         )
-    
+
     return teas_db[tea_id]
+
+# Get available tags
+@app.get("/tea/tags", tags=["Tea"])
+async def get_tags():
+    return {
+        "tags": ["general", "informative", "hari-bitch", "snitching-on-my-bestie"]
+    }
+
+# Get batch statistics
+@app.get("/tea/batches", tags=["Tea"])
+async def get_batches():
+    return {
+        "batches": [
+            {"batch": "25", "count": len([t for t in teas_db.values() if t.get("batch") == "25"])},
+            {"batch": "26", "count": len([t for t in teas_db.values() if t.get("batch") == "26"])},
+            {"batch": "27", "count": len([t for t in teas_db.values() if t.get("batch") == "27"])}
+        ]
+    }
 
 if __name__ == "__main__":
     # Get configuration from environment
