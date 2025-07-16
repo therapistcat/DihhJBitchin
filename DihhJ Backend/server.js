@@ -36,12 +36,16 @@ const corsOptions = {
     'http://localhost:3001',
     'https://dihhjbitchin-ido5.onrender.com'
   ],
-  credentials: true,
+  credentials: false, // Set to false to avoid CORS credential issues
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  optionsSuccessStatus: 200 // For legacy browser support
 };
 
 app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -49,6 +53,9 @@ app.use((req, res, next) => {
   console.log('Headers:', req.headers);
   next();
 });
+
+// Disable ETag caching for development
+app.set('etag', false);
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));

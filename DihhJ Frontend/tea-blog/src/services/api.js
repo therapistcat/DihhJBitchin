@@ -44,6 +44,8 @@ const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
   },
   timeout: 10000, // Reduced timeout
   withCredentials: false, // Disable credentials for CORS
@@ -118,13 +120,73 @@ api.interceptors.response.use(
 // Auth API calls
 export const authAPI = {
   register: async (userData) => {
-    const response = await api.post('/auth/register', userData);
-    return response.data;
+    console.log('🔐 Registering user:', { ...userData, password: '[HIDDEN]' });
+    try {
+      const response = await api.post('/auth/register', userData);
+      console.log('✅ Registration successful:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Registration failed:', error);
+      // Try fallback fetch for registration
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          mode: 'cors',
+          body: JSON.stringify(userData),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ Registration fallback successful:', data);
+        return data;
+      } catch (fetchError) {
+        console.error('❌ Registration fallback failed:', fetchError);
+        throw fetchError;
+      }
+    }
   },
-  
+
   login: async (credentials) => {
-    const response = await api.post('/auth/login', credentials);
-    return response.data;
+    console.log('🔐 Logging in user:', { ...credentials, password: '[HIDDEN]' });
+    try {
+      const response = await api.post('/auth/login', credentials);
+      console.log('✅ Login successful:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Login failed:', error);
+      // Try fallback fetch for login
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          mode: 'cors',
+          body: JSON.stringify(credentials),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ Login fallback successful:', data);
+        return data;
+      } catch (fetchError) {
+        console.error('❌ Login fallback failed:', fetchError);
+        throw fetchError;
+      }
+    }
   }
 };
 
@@ -132,35 +194,51 @@ export const authAPI = {
 export const teaAPI = {
   // Get list of tea posts with filtering and pagination
   getTeaPosts: async (params = {}) => {
+    console.log('🔥 getTeaPosts called with params:', params);
+    console.log('🔗 Using API_BASE_URL:', API_BASE_URL);
+
+    // Try direct fetch first (more reliable)
     try {
-      return await retryRequest(async () => {
-        const response = await api.get('/tea/list', { params });
-        return response.data;
+      const queryString = new URLSearchParams(params).toString();
+      const cacheBuster = `_t=${Date.now()}`;
+      const separator = queryString ? '&' : '?';
+      const url = `${API_BASE_URL}/tea/list${queryString ? '?' + queryString : ''}${separator}${cacheBuster}`;
+      console.log('🌐 Fetch URL:', url);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+        mode: 'cors',
+        cache: 'no-cache',
       });
-    } catch (axiosError) {
-      console.log('🔄 Axios failed, trying direct fetch...');
 
-      // Fallback to direct fetch
+      console.log('📡 Fetch response status:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Fetch error response:', errorText);
+        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Fetch successful!', data);
+      return data;
+    } catch (fetchError) {
+      console.error('❌ Fetch failed, trying axios...', fetchError);
+
+      // Fallback to axios
       try {
-        const queryString = new URLSearchParams(params).toString();
-        const url = `${API_BASE_URL}/tea/list${queryString ? '?' + queryString : ''}`;
-
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        console.log('✅ Direct fetch successful!');
-        return data;
-      } catch (fetchError) {
-        console.error('❌ Both axios and fetch failed:', fetchError);
+        console.log('🔄 Trying axios request...');
+        const response = await api.get('/tea/list', { params });
+        console.log('✅ Axios request successful:', response.data);
+        return response.data;
+      } catch (axiosError) {
+        console.error('❌ Both fetch and axios failed:', axiosError);
         throw new Error(`Network error: ${fetchError.message}`);
       }
     }

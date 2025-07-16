@@ -25,9 +25,12 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
       console.log('🔥 CALLING API WITH PARAMS:', params);
       const response = await teaAPI.getTeaPosts(params);
       console.log('🔥 API RESPONSE RECEIVED:', response);
+      console.log('🔥 RESPONSE TYPE:', typeof response);
+      console.log('🔥 RESPONSE KEYS:', response ? Object.keys(response) : 'null');
 
       if (response && response.teas) {
         console.log('✅ SETTING TEAS:', response.teas.length, 'posts');
+        console.log('✅ FIRST TEA:', response.teas[0]);
         if (isLoadMore) {
           setTeas(prev => [...prev, ...response.teas]);
         } else {
@@ -39,6 +42,7 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
         setError(''); // Clear any previous errors
       } else {
         console.log('⚠️ NO TEAS IN RESPONSE');
+        console.log('⚠️ RESPONSE STRUCTURE:', JSON.stringify(response, null, 2));
         setTeas([]);
       }
     } catch (error) {

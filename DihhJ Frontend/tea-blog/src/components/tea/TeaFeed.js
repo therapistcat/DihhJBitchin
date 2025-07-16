@@ -21,20 +21,41 @@ const TeaFeed = () => {
   const [viewStartTime, setViewStartTime] = useState(Date.now());
   const [showStaleContentWarning, setShowStaleContentWarning] = useState(false);
 
-  // EMERGENCY TEST - Direct API call
-  const [emergencyData, setEmergencyData] = useState('Loading...');
+  // API connectivity test
+  const [emergencyData, setEmergencyData] = useState('Testing connection...');
 
   React.useEffect(() => {
-    fetch('http://localhost:8000/tea/list')
-      .then(r => r.json())
+    // Use the same API base URL as the rest of the app
+    const apiUrl = process.env.NODE_ENV === 'development'
+      ? 'http://localhost:8000'
+      : 'https://dihhjbitchin-backend.onrender.com';
+
+    fetch(`${apiUrl}/tea/list?_t=${Date.now()}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache',
+      },
+      mode: 'cors',
+      cache: 'no-cache',
+    })
+      .then(r => {
+        console.log('🚨 Emergency test response status:', r.status);
+        return r.json();
+      })
       .then(d => {
+        console.log('🚨 Emergency test data:', d);
         if (d.teas && d.teas.length > 0) {
           setEmergencyData(`✅ FOUND ${d.teas.length} POSTS: "${d.teas[0].title}"`);
         } else {
           setEmergencyData('❌ NO POSTS FOUND');
         }
       })
-      .catch(e => setEmergencyData('❌ ERROR: ' + e.message));
+      .catch(e => {
+        console.error('🚨 Emergency test error:', e);
+        setEmergencyData('❌ ERROR: ' + e.message);
+      });
   }, []);
 
   // Update URL when filters change
