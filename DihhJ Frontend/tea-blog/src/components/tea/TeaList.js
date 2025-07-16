@@ -12,6 +12,8 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
   const [lastRefresh, setLastRefresh] = useState(Date.now());
 
   const loadTeas = async (isLoadMore = false) => {
+    console.log('🔥 LOADING TEAS STARTED!', { isLoadMore, loading });
+
     try {
       const currentPage = isLoadMore ? page : 0;
       const params = {
@@ -20,11 +22,12 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
         ...filters
       };
 
+      console.log('🔥 CALLING API WITH PARAMS:', params);
       const response = await teaAPI.getTeaPosts(params);
-      console.log('🔥 TEA API RESPONSE:', response);
+      console.log('🔥 API RESPONSE RECEIVED:', response);
 
       if (response && response.teas) {
-        console.log('✅ Found teas:', response.teas.length);
+        console.log('✅ SETTING TEAS:', response.teas.length, 'posts');
         if (isLoadMore) {
           setTeas(prev => [...prev, ...response.teas]);
         } else {
@@ -33,24 +36,42 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
 
         setHasMore(response.teas.length === 10);
         setPage(currentPage + 1);
+        setError(''); // Clear any previous errors
       } else {
-        console.log('❌ No teas found in response');
+        console.log('⚠️ NO TEAS IN RESPONSE');
         setTeas([]);
       }
     } catch (error) {
-      console.error('Error loading teas:', error);
+      console.error('❌ ERROR LOADING TEAS:', error);
       setError(`Failed to load tea posts: ${error.message}`);
+      setTeas([]); // Set empty array on error
     } finally {
+      console.log('🔥 SETTING LOADING TO FALSE');
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    console.log('🔥 USEEFFECT TRIGGERED - LOADING TEAS');
     setLoading(true);
     setError('');
     setPage(0);
-    loadTeas(false);
+    setTeas([]); // Clear existing teas
+
+    // Force loading to stop after 15 seconds if stuck
+    const loadingTimeout = setTimeout(() => {
+      console.log('⏰ LOADING TIMEOUT - FORCING STOP');
+      setLoading(false);
+      setError('Loading timeout - please refresh manually');
+    }, 15000);
+
+    loadTeas(false).finally(() => {
+      clearTimeout(loadingTimeout);
+    });
+
     setLastRefresh(Date.now());
+
+    return () => clearTimeout(loadingTimeout);
   }, [filters, refreshTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLoadMore = () => {
@@ -76,12 +97,41 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
 
 
 
+  // EMERGENCY: Show data even if loading is stuck
+  React.useEffect(() => {
+    const emergencyTimeout = setTimeout(() => {
+      if (loading) {
+        console.log('🚨 EMERGENCY: Forcing loading to stop!');
+        setLoading(false);
+      }
+    }, 5000); // 5 second emergency timeout
+
+    return () => clearTimeout(emergencyTimeout);
+  }, [loading]);
+
   if (loading && teas.length === 0) {
     return (
       <div className="tea-list-container">
         <div className="loading-state">
           <div className="loading-spinner"></div>
           <p>Loading tea posts...</p>
+          <button
+            onClick={() => {
+              console.log('🔥 EMERGENCY STOP LOADING');
+              setLoading(false);
+            }}
+            style={{
+              marginTop: '10px',
+              padding: '8px 16px',
+              backgroundColor: '#ff4444',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Stop Loading (Emergency)
+          </button>
         </div>
       </div>
     );
@@ -116,18 +166,7 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
 
   return (
     <div className="tea-list-container">
-      {/* Debug Info */}
-      <div style={{ padding: '10px', backgroundColor: '#2a2a2a', color: 'white', marginBottom: '10px' }}>
-        <strong>🔥 DEBUG INFO:</strong><br/>
-        Teas loaded: {teas.length}<br/>
-        Loading: {loading ? 'Yes' : 'No'}<br/>
-        Error: {error || 'None'}<br/>
-        {teas.length > 0 && (
-          <div>
-            First tea: {teas[0].title}
-          </div>
-        )}
-      </div>
+
 
       {/* Manual Refresh Button */}
       <div className="refresh-controls">
@@ -145,24 +184,17 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
       <div className="tea-list">
         {teas.length > 0 ? (
           teas.map(tea => (
-            <div key={tea.id} style={{
-              padding: '20px',
-              margin: '10px',
-              backgroundColor: '#333',
-              color: 'white',
-              borderRadius: '8px'
-            }}>
-              <h3>🔥 {tea.title}</h3>
-              <p>{tea.content}</p>
-              <small>By: {tea.author} | Batch: {tea.batch} | Tag: {tea.tag}</small>
-              <br/>
-              <small>👍 {tea.upvotes} | 👎 {tea.downvotes} | Score: {tea.score}</small>
-            </div>
+            <TeaCard
+              key={tea.id}
+              tea={tea}
+              onTeaUpdate={handleTeaUpdate}
+              onTeaClick={onTeaClick}
+            />
           ))
         ) : (
-          <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+          <div className="no-posts-message">
             <h3>No tea posts found</h3>
-            <p>Click refresh to load posts</p>
+            <p>Click refresh to load posts or create a new tea post!</p>
           </div>
         )}
       </div>

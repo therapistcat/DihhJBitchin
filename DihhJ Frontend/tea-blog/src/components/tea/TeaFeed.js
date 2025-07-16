@@ -8,7 +8,7 @@ import './Tea.css';
 const TeaFeed = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Get filters from URL params
   const [filters, setFilters] = useState({
     sort_by: searchParams.get('sort') || 'hot',
@@ -16,10 +16,26 @@ const TeaFeed = () => {
     batch: searchParams.get('batch') || null,
     search: searchParams.get('search') || ''
   });
-  
+
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [viewStartTime, setViewStartTime] = useState(Date.now());
   const [showStaleContentWarning, setShowStaleContentWarning] = useState(false);
+
+  // EMERGENCY TEST - Direct API call
+  const [emergencyData, setEmergencyData] = useState('Loading...');
+
+  React.useEffect(() => {
+    fetch('http://localhost:8000/tea/list')
+      .then(r => r.json())
+      .then(d => {
+        if (d.teas && d.teas.length > 0) {
+          setEmergencyData(`✅ FOUND ${d.teas.length} POSTS: "${d.teas[0].title}"`);
+        } else {
+          setEmergencyData('❌ NO POSTS FOUND');
+        }
+      })
+      .catch(e => setEmergencyData('❌ ERROR: ' + e.message));
+  }, []);
 
   // Update URL when filters change
   useEffect(() => {
@@ -82,6 +98,19 @@ const TeaFeed = () => {
 
   return (
     <div className="tea-feed">
+      {/* EMERGENCY STATUS */}
+      <div style={{
+        padding: '20px',
+        backgroundColor: '#ff0000',
+        color: 'white',
+        fontSize: '18px',
+        fontWeight: 'bold',
+        textAlign: 'center',
+        margin: '10px 0'
+      }}>
+        🚨 EMERGENCY STATUS: {emergencyData} 🚨
+      </div>
+
       {/* Stale Content Warning */}
       {showStaleContentWarning && (
         <div className="stale-content-warning">

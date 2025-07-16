@@ -19,12 +19,34 @@ const API_BASE_URL = getApiBaseUrl();
 
 console.log('🔗 API Base URL:', API_BASE_URL);
 
+// Test connectivity on load
+const testConnectivity = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/health`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.ok) {
+      console.log('✅ Backend connectivity test passed');
+    } else {
+      console.warn('⚠️ Backend responding but with error:', response.status);
+    }
+  } catch (error) {
+    console.error('❌ Backend connectivity test failed:', error.message);
+  }
+};
+
+// Run connectivity test
+testConnectivity();
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000, // 30 second timeout for production
+  timeout: 10000, // Reduced timeout
+  withCredentials: false, // Disable credentials for CORS
 });
 
 // Add request interceptor for debugging
@@ -41,6 +63,24 @@ api.interceptors.request.use(
   }
 );
 
+// Retry function for failed requests
+const retryRequest = async (requestFn, maxRetries = 3, delay = 1000) => {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await requestFn();
+    } catch (error) {
+      console.log(`🔄 Retry attempt ${i + 1}/${maxRetries} for request`);
+
+      if (i === maxRetries - 1) {
+        throw error;
+      }
+
+      // Wait before retrying
+      await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
+    }
+  }
+};
+
 // Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => {
@@ -49,7 +89,7 @@ api.interceptors.response.use(
     }
     return response;
   },
-  (error) => {
+  async (error) => {
     console.error('❌ API Error:', {
       url: error.config?.url,
       method: error.config?.method,
@@ -58,15 +98,19 @@ api.interceptors.response.use(
       data: error.response?.data
     });
 
+    // Handle specific error types
     if (error.code === 'ECONNABORTED') {
-      console.error('Request timeout - server might be starting up');
+      console.error('🕐 Request timeout - server might be slow');
+    } else if (error.code === 'ERR_NETWORK') {
+      console.error('🌐 Network error - check connection or CORS');
     } else if (error.response?.status === 500) {
-      console.error('Server error - please try again later');
+      console.error('🔥 Server error - backend issue');
     } else if (!error.response) {
-      console.error('Network error - check your connection and CORS settings');
+      console.error('📡 No response - network or CORS issue');
     } else if (error.response?.status === 404) {
-      console.error('Endpoint not found - check API routes');
+      console.error('🔍 Endpoint not found');
     }
+
     return Promise.reject(error);
   }
 );
@@ -88,8 +132,38 @@ export const authAPI = {
 export const teaAPI = {
   // Get list of tea posts with filtering and pagination
   getTeaPosts: async (params = {}) => {
-    const response = await api.get('/tea/list', { params });
-    return response.data;
+    try {
+      return await retryRequest(async () => {
+        const response = await api.get('/tea/list', { params });
+        return response.data;
+      });
+    } catch (axiosError) {
+      console.log('🔄 Axios failed, trying direct fetch...');
+
+      // Fallback to direct fetch
+      try {
+        const queryString = new URLSearchParams(params).toString();
+        const url = `${API_BASE_URL}/tea/list${queryString ? '?' + queryString : ''}`;
+
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ Direct fetch successful!');
+        return data;
+      } catch (fetchError) {
+        console.error('❌ Both axios and fetch failed:', fetchError);
+        throw new Error(`Network error: ${fetchError.message}`);
+      }
+    }
   },
   
   // Get single tea post
