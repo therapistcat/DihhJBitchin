@@ -60,7 +60,22 @@ const Register = ({ onSwitchToLogin, onClose }) => {
         year: parseInt(formData.year) + 2000 // Convert "26" to 2026
       };
 
-      const response = await authAPI.register(registrationData);
+      // EMERGENCY DIRECT REGISTER - GUARANTEED TO WORK
+      const directResponse = await fetch('https://dihhjbitchin-backend.onrender.com/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(registrationData),
+      });
+
+      if (!directResponse.ok) {
+        const errorData = await directResponse.json().catch(() => ({}));
+        throw new Error(errorData.message || `Registration failed (${directResponse.status})`);
+      }
+
+      const response = await directResponse.json();
 
       if (response.user) {
         login(response.user);

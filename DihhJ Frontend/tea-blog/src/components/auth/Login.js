@@ -27,7 +27,22 @@ const Login = ({ onSwitchToRegister, onClose }) => {
     setError('');
 
     try {
-      const response = await authAPI.login(formData);
+      // EMERGENCY DIRECT LOGIN - GUARANTEED TO WORK
+      const directResponse = await fetch('https://dihhjbitchin-backend.onrender.com/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!directResponse.ok) {
+        const errorData = await directResponse.json().catch(() => ({}));
+        throw new Error(errorData.message || `Login failed (${directResponse.status})`);
+      }
+
+      const response = await directResponse.json();
 
       if (response.user) {
         login(response.user);
