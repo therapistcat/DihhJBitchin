@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // PERMANENT SOLUTION - BULLETPROOF API CONFIGURATION
-const API_BASE_URL = 'https://dihhjbitchin-backend.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://dihhjbitchin-backend.onrender.com';
 console.log('🔥 PERMANENT SOLUTION - API URL:', API_BASE_URL);
 
 
@@ -91,7 +91,7 @@ export const authAPI = {
     console.log('🔥 BULLETPROOF register called');
 
     try {
-      const response = await fetch('https://dihhjbitchin-backend.onrender.com/auth/register', {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, { // <-- FIXED
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -118,7 +118,7 @@ export const authAPI = {
     console.log('🔥 BULLETPROOF login called');
 
     try {
-      const response = await fetch('https://dihhjbitchin-backend.onrender.com/auth/login', {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, { // <-- FIXED
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ export const teaAPI = {
     console.log('🔥 PERMANENT getTeaPosts called');
 
     // BULLETPROOF: Direct fetch with absolute URL
-    const url = 'https://dihhjbitchin-backend.onrender.com/tea/list';
+    const url = `${API_BASE_URL}/tea/list`; // <-- FIXED
     console.log('🔥 BULLETPROOF URL:', url);
 
     try {
