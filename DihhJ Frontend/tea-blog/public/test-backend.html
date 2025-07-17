@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DihhJ Backend Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: #fff; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-result { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #2d5a2d; border: 1px solid #4a8a4a; }
+        .error { background: #5a2d2d; border: 1px solid #8a4a4a; }
+        .loading { background: #2d2d5a; border: 1px solid #4a4a8a; }
+        button { padding: 10px 20px; margin: 10px 5px; background: #ff6b35; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #e55a2b; }
+        pre { background: #333; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 DihhJ Backend Connection Test</h1>
+        <p>This will test if your frontend can connect to the backend.</p>
+        
+        <button onclick="testBackend()">🚀 Test Backend Connection</button>
+        <button onclick="testTeaAPI()">🍵 Test Tea API</button>
+        <button onclick="clearResults()">🧹 Clear Results</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://dihhjbitchin-backend.onrender.com';
+        
+        function addResult(message, type = 'loading') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function testBackend() {
+            addResult('🔍 Testing backend health...', 'loading');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.text();
+                    addResult(`✅ Backend Health: SUCCESS (${response.status})<br><pre>${data}</pre>`, 'success');
+                } else {
+                    addResult(`❌ Backend Health: FAILED (${response.status})`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Backend Health: ERROR - ${error.message}`, 'error');
+            }
+        }
+        
+        async function testTeaAPI() {
+            addResult('🍵 Testing tea API...', 'loading');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/tea/list`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult(`✅ Tea API: SUCCESS (${response.status})<br>Found ${data.teas ? data.teas.length : 0} tea posts<br><pre>${JSON.stringify(data, null, 2)}</pre>`, 'success');
+                } else {
+                    addResult(`❌ Tea API: FAILED (${response.status})`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Tea API: ERROR - ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-test on load
+        window.onload = function() {
+            addResult('🚀 DihhJ Backend Test Tool Loaded', 'success');
+            addResult(`🔗 Testing connection to: ${BACKEND_URL}`, 'loading');
+        };
+    </script>
+</body>
+</html>
