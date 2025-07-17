@@ -1,18 +1,14 @@
 import axios from 'axios';
 
-// Base API configuration
+// Base API configuration - EMERGENCY FIX
 const getApiBaseUrl = () => {
-  // Always use environment variable if set
-  if (process.env.REACT_APP_API_URL) {
-    return process.env.REACT_APP_API_URL;
-  }
+  // FORCE production backend URL to fix connection issues
+  const forcedURL = 'https://dihhjbitchin-backend.onrender.com';
+  console.log('🚨 EMERGENCY FIX - FORCED API URL:', forcedURL);
+  console.log('🚨 NODE_ENV:', process.env.NODE_ENV);
+  console.log('🚨 REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
 
-  // Use local backend in development, production backend in production
-  if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:8000';
-  }
-
-  return 'https://dihhjbitchin-backend.onrender.com';
+  return forcedURL;
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -195,45 +191,47 @@ export const authAPI = {
 
 // Tea API calls
 export const teaAPI = {
-  // Get list of tea posts with filtering and pagination
+  // Get list of tea posts with filtering and pagination - EMERGENCY SIMPLIFIED
   getTeaPosts: async (params = {}) => {
-    console.log('🔥 getTeaPosts called with params:', params);
-    console.log('🔗 Using API_BASE_URL:', API_BASE_URL);
+    console.log('🚨 EMERGENCY getTeaPosts called with params:', params);
+    console.log('🚨 Using API_BASE_URL:', API_BASE_URL);
 
+    // EMERGENCY: Try direct fetch first with minimal config
     try {
-      console.log('🔄 Making axios request to /tea/list...');
-      const response = await api.get('/tea/list', { params });
-      console.log('✅ Axios request successful:', response.data);
-      return response.data;
-    } catch (axiosError) {
-      console.error('❌ Axios failed, trying direct fetch...', axiosError);
+      const queryString = new URLSearchParams(params).toString();
+      const url = `${API_BASE_URL}/tea/list${queryString ? '?' + queryString : ''}`;
+      console.log('🚨 EMERGENCY fetch URL:', url);
 
-      // Fallback to direct fetch with simplified config
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors',
+      });
+
+      console.log('🚨 EMERGENCY fetch response:', response.status, response.statusText);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('🚨 EMERGENCY fetch SUCCESS!', data);
+      return data;
+    } catch (fetchError) {
+      console.error('🚨 EMERGENCY fetch failed:', fetchError);
+
+      // Last resort: try axios
       try {
-        const queryString = new URLSearchParams(params).toString();
-        const url = `${API_BASE_URL}/tea/list${queryString ? '?' + queryString : ''}`;
-        console.log('🌐 Fallback fetch URL:', url);
-
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-          },
-          mode: 'cors',
-        });
-
-        console.log('📡 Fetch response status:', response.status, response.statusText);
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        console.log('✅ Fetch fallback successful!', data);
-        return data;
-      } catch (fetchError) {
-        console.error('❌ Both axios and fetch failed:', fetchError);
-        throw new Error(`Network error: Unable to connect to server. Please check your internet connection.`);
+        console.log('🚨 EMERGENCY trying axios as last resort...');
+        const response = await api.get('/tea/list', { params });
+        console.log('🚨 EMERGENCY axios SUCCESS:', response.data);
+        return response.data;
+      } catch (axiosError) {
+        console.error('🚨 EMERGENCY: ALL METHODS FAILED!', axiosError);
+        throw new Error(`EMERGENCY: Cannot connect to server at ${API_BASE_URL}. Server may be down.`);
       }
     }
   },
