@@ -290,10 +290,10 @@ export const commentsAPI = {
   }
 };
 
-const API_URL = process.env.REACT_APP_API_URL || 'https://dihhjbitchin-ido5.onrender.com';
+const API_URL = process.env.REACT_APP_API_URL || 'https://dihhjbitchin-backend.onrender.com'; // FIXED
 
 export async function fetchTeas() {
-  const res = await fetch(`${API_URL}/teas`);
+  const res = await fetch(`${API_URL}/tea/list`);
   if (!res.ok) throw new Error('Failed to fetch teas');
   return res.json();
 }

@@ -27,22 +27,7 @@ const Login = ({ onSwitchToRegister, onClose }) => {
     setError('');
 
     try {
-      // EMERGENCY DIRECT LOGIN - GUARANTEED TO WORK
-      const directResponse = await fetch('https://dihhjbitchin-ido5.onrender.com/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!directResponse.ok) {
-        const errorData = await directResponse.json().catch(() => ({}));
-        throw new Error(errorData.message || `Login failed (${directResponse.status})`);
-      }
-
-      const response = await directResponse.json();
+      const response = await authAPI.login(formData);
 
       if (response.user) {
         login(response.user);
@@ -52,15 +37,7 @@ const Login = ({ onSwitchToRegister, onClose }) => {
       }
     } catch (error) {
       console.error('Login error:', error);
-      if (error.response?.data?.message) {
-        setError(error.response.data.message);
-      } else if (error.response?.data?.detail) {
-        setError(error.response.data.detail);
-      } else if (error.message) {
-        setError(error.message);
-      } else {
-        setError('Login failed. Please check your credentials and try again.');
-      }
+      setError(error.message || 'Login failed. Please check your credentials and try again.');
     } finally {
       setIsLoading(false);
     }
