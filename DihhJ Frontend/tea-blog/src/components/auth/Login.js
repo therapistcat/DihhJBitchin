@@ -28,7 +28,7 @@ const Login = ({ onSwitchToRegister, onClose }) => {
 
     try {
       // EMERGENCY DIRECT LOGIN - GUARANTEED TO WORK
-      const directResponse = await fetch('https://dihhjbitchin-backend.onrender.com/auth/login', {
+      const directResponse = await fetch('https://dihhjbitchin-ido5.onrender.com/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
