@@ -192,7 +192,7 @@ const UserProfile = () => {
                           <TeaCard
                             tea={post}
                             onTeaClick={handleTeaClick}
-                            onTeaUpdate={loadUserData}
+                            onTeaUpdate={() => {}} // DISABLED - was causing auto-refresh
                           />
                           <div className="post-actions">
                             <button 

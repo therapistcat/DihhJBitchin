@@ -82,7 +82,8 @@ const CommentsList = ({ teaId }) => {
 
       await commentsAPI.createComment(teaId, commentData, user.username);
       setNewComment('');
-      loadComments(); // Reload comments
+      // REMOVED loadComments() - was causing auto-refresh
+      console.log('Comment posted successfully - manual refresh required');
     } catch (error) {
       console.error('Error creating comment:', error);
       alert('Failed to post comment. Please try again.');
@@ -99,7 +100,8 @@ const CommentsList = ({ teaId }) => {
 
     try {
       await commentsAPI.createComment(teaId, replyData, user.username);
-      loadComments(); // Reload comments
+      // REMOVED loadComments() - was causing auto-refresh
+      console.log('Reply posted successfully - manual refresh required');
     } catch (error) {
       console.error('Error creating reply:', error);
       alert('Failed to post reply. Please try again.');
@@ -111,7 +113,7 @@ const CommentsList = ({ teaId }) => {
       <div key={comment.id}>
         <Comment
           comment={comment}
-          onCommentUpdate={loadComments}
+          onCommentUpdate={() => {}} // DISABLED - was causing auto-refresh
           onReply={handleReply}
           level={level}
         />

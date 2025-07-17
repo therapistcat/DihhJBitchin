@@ -9,9 +9,7 @@ const APITest = () => {
 
   useEffect(() => {
     const runTests = async () => {
-      const apiUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:8000' 
-        : 'https://dihhjbitchin-backend.onrender.com';
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://dihhjbitchin-ido5.onrender.com';
 
       // Test 1: Health check
       try {
@@ -107,7 +105,7 @@ const APITest = () => {
       <div><strong>Tea List:</strong> {testResults.teaList}</div>
       <div><strong>Direct Fetch:</strong> {testResults.directFetch}</div>
       <div style={{ marginTop: '10px', fontSize: '10px', color: '#888' }}>
-        API URL: {process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : 'https://dihhjbitchin-backend.onrender.com'}
+        API URL: {process.env.REACT_APP_API_URL || 'https://dihhjbitchin-ido5.onrender.com'}
       </div>
     </div>
   );

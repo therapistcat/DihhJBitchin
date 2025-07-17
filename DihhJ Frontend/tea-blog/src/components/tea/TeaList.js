@@ -3,7 +3,7 @@ import { teaAPI } from '../../services/api';
 import TeaCard from './TeaCard';
 import './Tea.css';
 
-const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
+const TeaList = ({ filters = {}, onTeaClick }) => {
   const [teas, setTeas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -62,12 +62,12 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
     setPage(0);
     setTeas([]); // Clear existing teas
 
-    // Force loading to stop after 15 seconds if stuck
+    // Prevent infinite loading
     const loadingTimeout = setTimeout(() => {
       console.log('⏰ LOADING TIMEOUT - FORCING STOP');
       setLoading(false);
-      setError('Loading timeout - please refresh manually');
-    }, 15000);
+      setError('Loading took too long - please try refreshing');
+    }, 20000);
 
     loadTeas(false).finally(() => {
       clearTimeout(loadingTimeout);
@@ -76,7 +76,18 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
     setLastRefresh(Date.now());
 
     return () => clearTimeout(loadingTimeout);
-  }, [filters, refreshTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [filters]); // Only reload when filters change - no auto-refresh
+
+  // Manual refresh only when button is clicked - simplified without refreshTrigger
+  const handleManualRefresh = () => {
+    console.log('🔄 Manual refresh triggered');
+    setLoading(true);
+    setError('');
+    setPage(0);
+    setTeas([]);
+    loadTeas(false);
+    setLastRefresh(Date.now());
+  };
 
   const handleLoadMore = () => {
     if (!loading && hasMore) {
@@ -85,33 +96,15 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
   };
 
   const handleTeaUpdate = (teaId) => {
-    // Refresh the specific tea post or the entire list
-    // For simplicity, we'll refresh the entire list
-    loadTeas(false);
-    setLastRefresh(Date.now());
-  };
-
-  const handleManualRefresh = () => {
-    setLoading(true);
-    setError('');
-    setPage(0);
-    loadTeas(false);
-    setLastRefresh(Date.now());
+    // REMOVED AUTO-REFRESH - was causing infinite reloading!
+    console.log('Tea updated:', teaId, '- Manual refresh required');
   };
 
 
 
-  // EMERGENCY: Show data even if loading is stuck
-  React.useEffect(() => {
-    const emergencyTimeout = setTimeout(() => {
-      if (loading) {
-        console.log('🚨 EMERGENCY: Forcing loading to stop!');
-        setLoading(false);
-      }
-    }, 5000); // 5 second emergency timeout
 
-    return () => clearTimeout(emergencyTimeout);
-  }, [loading]);
+
+  // REMOVED - This was causing infinite re-renders!
 
   if (loading && teas.length === 0) {
     return (
@@ -121,20 +114,20 @@ const TeaList = ({ filters = {}, onTeaClick, refreshTrigger, onRefresh }) => {
           <p>Loading tea posts...</p>
           <button
             onClick={() => {
-              console.log('🔥 EMERGENCY STOP LOADING');
+              console.log('🔄 Manual stop loading');
               setLoading(false);
             }}
             style={{
               marginTop: '10px',
               padding: '8px 16px',
-              backgroundColor: '#ff4444',
+              backgroundColor: '#007bff',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer'
             }}
           >
-            Stop Loading (Emergency)
+            Stop Loading
           </button>
         </div>
       </div>

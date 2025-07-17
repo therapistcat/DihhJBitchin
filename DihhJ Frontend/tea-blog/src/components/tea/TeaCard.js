@@ -84,10 +84,10 @@ const TeaCard = ({ tea, onTeaUpdate, onTeaClick }) => {
         }
       }, 2000);
 
-      // Notify parent component if needed
-      if (onTeaUpdate) {
-        onTeaUpdate(tea.id);
-      }
+      // REMOVED onTeaUpdate call - was causing infinite reloading!
+      // if (onTeaUpdate) {
+      //   onTeaUpdate(tea.id);
+      // }
     } catch (error) {
       console.error('Error voting:', error);
       const notification = document.createElement('div');

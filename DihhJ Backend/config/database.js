@@ -48,6 +48,8 @@ const connectDB = async () => {
   }
 };
 
+
+
 const createIndexes = async () => {
   try {
     // Users collection indexes

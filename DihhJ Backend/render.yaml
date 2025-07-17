@@ -16,6 +16,6 @@ services:
       - key: DATABASE_NAME
         value: dihhj_backend
       - key: CORS_ORIGINS
-        value: http://localhost:3000,http://localhost:3001,https://dihhjbitchin-ido5.onrender.com
+        value: http://localhost:3000,http://localhost:3001,https://dihhjbitchin-backend.onrender.com
       - key: BCRYPT_ROUNDS
         value: 12

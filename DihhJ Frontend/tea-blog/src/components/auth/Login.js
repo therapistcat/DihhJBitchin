@@ -55,7 +55,7 @@ const Login = ({ onSwitchToRegister, onClose }) => {
     <div className="auth-container">
       <div className="auth-modal">
         <div className="auth-header">
-          <h2>Welcome Back, Bitcher! 🔥</h2>
+          <h2>Welcome Back, Bitch! 🔥</h2>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
         

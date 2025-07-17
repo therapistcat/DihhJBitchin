@@ -12,7 +12,7 @@ const getApiBaseUrl = () => {
     return 'http://localhost:8000';
   }
 
-  return 'https://dihhjbitchin-backend.onrender.com';
+  return 'https://dihhjbitchin-ido5.onrender.com';
 };
 
 const API_BASE_URL = getApiBaseUrl();

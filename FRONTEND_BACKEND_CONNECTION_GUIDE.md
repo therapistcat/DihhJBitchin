@@ -30,7 +30,7 @@ After backend redeployment, test the connection:
 
 1. **Open the test page**: `DihhJ Frontend/tea-blog/test-connection.html`
 2. **Run the test script**: `node test-frontend-backend-connection.js`
-3. **Check your live frontend**: https://dihhjbitchin-ido5.onrender.com
+3. **Check your live frontend**: https://dihhjbitchin-backend.onrender.com
 
 ## 🔧 Updated API Endpoints
 
@@ -54,7 +54,7 @@ The backend now supports these endpoints that your frontend expects:
 ## 🎨 Frontend Configuration
 
 The frontend is now configured with:
-- **API URL**: `https://dihhjbitchin-backend.onrender.com`
+- **API URL**: `https://dihhjbitchin-ido5.onrender.com`
 - **CORS**: Properly configured to allow cross-origin requests
 - **Environment**: Production settings applied
 
@@ -101,7 +101,7 @@ If issues persist after deployment:
 - Configured build settings for production
 
 ### CORS Settings
-- Allowed frontend domain: `https://dihhjbitchin-ido5.onrender.com`
+- Allowed frontend domain: `https://dihhjbitchin-backend.onrender.com`
 - Enabled all necessary HTTP methods and headers
 
 ## 🎉 Expected Result
@@ -113,4 +113,4 @@ After deployment, your frontend should be able to:
 - ✅ Handle voting system properly
 - ✅ Load tags and batch information
 
-The connection between your frontend at `https://dihhjbitchin-ido5.onrender.com` and backend at `https://dihhjbitchin-backend.onrender.com` should work seamlessly!
+The connection between your frontend at `https://dihhjbitchin-backend.onrender.com` and backend at `https://dihhjbitchin-ido5.onrender.com` should work seamlessly!

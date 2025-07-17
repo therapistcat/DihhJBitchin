@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🚨 EMERGENCY PP RESCUE TEST 🚨</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #000; 
+            color: #fff; 
+            padding: 20px;
+            text-align: center;
+        }
+        .status { 
+            padding: 20px; 
+            margin: 10px; 
+            border-radius: 10px; 
+            font-size: 18px; 
+            font-weight: bold;
+        }
+        .success { background: #00ff00; color: #000; }
+        .error { background: #ff0000; color: #fff; }
+        .loading { background: #ffff00; color: #000; }
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚨 EMERGENCY PP RESCUE TEST 🚨</h1>
+    <div id="status" class="status loading">Testing connection...</div>
+    
+    <button onclick="testAPI()">Test API Connection</button>
+    <button onclick="testRegister()">Test Registration</button>
+    <button onclick="testLogin()">Test Login</button>
+    
+    <div id="results"></div>
+
+    <script>
+        const API_URL = 'http://localhost:8001';
+        
+        async function testAPI() {
+            const status = document.getElementById('status');
+            const results = document.getElementById('results');
+            
+            try {
+                status.textContent = 'Testing API...';
+                status.className = 'status loading';
+                
+                const response = await fetch(`${API_URL}/tea/list`);
+                const data = await response.json();
+                
+                if (data.teas && data.teas.length > 0) {
+                    status.textContent = `✅ API WORKING! Found ${data.teas.length} posts`;
+                    status.className = 'status success';
+                    results.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    status.textContent = '❌ API responding but no data';
+                    status.className = 'status error';
+                }
+            } catch (error) {
+                status.textContent = `❌ API ERROR: ${error.message}`;
+                status.className = 'status error';
+                results.innerHTML = `<pre>Error: ${error.stack}</pre>`;
+            }
+        }
+        
+        async function testRegister() {
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'testuser' + Date.now(),
+                        password: 'testpass123',
+                        year: 2026
+                    })
+                });
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `<h3>Registration Result:</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<h3>Registration Error:</h3><pre>${error.message}</pre>`;
+            }
+        }
+        
+        async function testLogin() {
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'testuser',
+                        password: 'testpass123'
+                    })
+                });
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `<h3>Login Result:</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<h3>Login Error:</h3><pre>${error.message}</pre>`;
+            }
+        }
+        
+        // Auto-test on load
+        window.onload = testAPI;
+    </script>
+</body>
+</html>
