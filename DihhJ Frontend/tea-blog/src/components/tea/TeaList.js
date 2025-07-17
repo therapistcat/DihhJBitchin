@@ -56,27 +56,15 @@ const TeaList = ({ filters = {}, onTeaClick }) => {
   };
 
   useEffect(() => {
-    console.log('🔥 USEEFFECT TRIGGERED - LOADING TEAS');
+    console.log('🔥 PERMANENT - LOADING TEAS (NO AUTO-REFRESH)');
     setLoading(true);
     setError('');
     setPage(0);
     setTeas([]); // Clear existing teas
 
-    // Prevent infinite loading
-    const loadingTimeout = setTimeout(() => {
-      console.log('⏰ LOADING TIMEOUT - FORCING STOP');
-      setLoading(false);
-      setError('Loading took too long - please try refreshing');
-    }, 20000);
-
-    loadTeas(false).finally(() => {
-      clearTimeout(loadingTimeout);
-    });
-
+    loadTeas(false);
     setLastRefresh(Date.now());
-
-    return () => clearTimeout(loadingTimeout);
-  }, [filters]); // Only reload when filters change - no auto-refresh
+  }, [filters]); // PERMANENT: Only reload when filters change - NO AUTO-REFRESH EVER
 
   // Manual refresh only when button is clicked - simplified without refreshTrigger
   const handleManualRefresh = () => {

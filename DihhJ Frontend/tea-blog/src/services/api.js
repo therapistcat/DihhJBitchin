@@ -6,30 +6,8 @@ console.log('🔥 PERMANENT SOLUTION - API URL:', API_BASE_URL);
 
 
 
-// Test connectivity on load
-const testConnectivity = async () => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/health`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json'
-      },
-      mode: 'cors',
-    });
-
-    if (response.ok) {
-      console.log('✅ Backend connectivity test passed');
-    } else {
-      console.warn('⚠️ Backend responding but with error:', response.status);
-    }
-  } catch (error) {
-    console.warn('⚠️ Backend connectivity test failed:', error.message);
-    console.log('🔄 This is normal on first load - the backend will be available when needed');
-  }
-};
-
-// Run connectivity test (non-blocking)
-setTimeout(testConnectivity, 1000);
+// PERMANENT SOLUTION - NO AUTO-CONNECTIVITY TESTS
+console.log('🔥 PERMANENT - Backend will be tested only when needed');
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -107,75 +85,59 @@ api.interceptors.response.use(
   }
 );
 
-// Auth API calls
+// PERMANENT SOLUTION - BULLETPROOF AUTH API
 export const authAPI = {
   register: async (userData) => {
-    console.log('🔐 Registering user:', { ...userData, password: '[HIDDEN]' });
+    console.log('🔥 BULLETPROOF register called');
+
     try {
-      const response = await api.post('/auth/register', userData);
-      console.log('✅ Registration successful:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Registration failed:', error);
-      // Try fallback fetch for registration
-      try {
-        const response = await fetch(`${API_BASE_URL}/auth/register`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          mode: 'cors',
-          body: JSON.stringify(userData),
-        });
+      const response = await fetch('https://dihhjbitchin-backend.onrender.com/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-        }
-
+      if (response.ok) {
         const data = await response.json();
-        console.log('✅ Registration fallback successful:', data);
+        console.log('🔥 BULLETPROOF register SUCCESS!', data);
         return data;
-      } catch (fetchError) {
-        console.error('❌ Registration fallback failed:', fetchError);
-        throw fetchError;
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Registration failed (${response.status})`);
       }
+    } catch (error) {
+      console.error('🔥 BULLETPROOF register ERROR:', error);
+      throw new Error(`Registration failed: ${error.message}`);
     }
   },
 
   login: async (credentials) => {
-    console.log('🔐 Logging in user:', { ...credentials, password: '[HIDDEN]' });
+    console.log('🔥 BULLETPROOF login called');
+
     try {
-      const response = await api.post('/auth/login', credentials);
-      console.log('✅ Login successful:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Login failed:', error);
-      // Try fallback fetch for login
-      try {
-        const response = await fetch(`${API_BASE_URL}/auth/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          mode: 'cors',
-          body: JSON.stringify(credentials),
-        });
+      const response = await fetch('https://dihhjbitchin-backend.onrender.com/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+      });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-        }
-
+      if (response.ok) {
         const data = await response.json();
-        console.log('✅ Login fallback successful:', data);
+        console.log('🔥 BULLETPROOF login SUCCESS!', data);
         return data;
-      } catch (fetchError) {
-        console.error('❌ Login fallback failed:', fetchError);
-        throw fetchError;
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Login failed (${response.status})`);
       }
+    } catch (error) {
+      console.error('🔥 BULLETPROOF login ERROR:', error);
+      throw new Error(`Login failed: ${error.message}`);
     }
   }
 };
