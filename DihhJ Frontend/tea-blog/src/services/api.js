@@ -24,7 +24,10 @@ const testConnectivity = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/health`, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Accept': 'application/json'
+      },
+      mode: 'cors',
     });
 
     if (response.ok) {
@@ -33,21 +36,21 @@ const testConnectivity = async () => {
       console.warn('⚠️ Backend responding but with error:', response.status);
     }
   } catch (error) {
-    console.error('❌ Backend connectivity test failed:', error.message);
+    console.warn('⚠️ Backend connectivity test failed:', error.message);
+    console.log('🔄 This is normal on first load - the backend will be available when needed');
   }
 };
 
-// Run connectivity test
-testConnectivity();
+// Run connectivity test (non-blocking)
+setTimeout(testConnectivity, 1000);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-    'Cache-Control': 'no-cache',
-    'Pragma': 'no-cache',
+    'Accept': 'application/json',
   },
-  timeout: 10000, // Reduced timeout
+  timeout: 15000, // Increased timeout for better reliability
   withCredentials: false, // Disable credentials for CORS
 });
 
@@ -197,57 +200,53 @@ export const teaAPI = {
     console.log('🔥 getTeaPosts called with params:', params);
     console.log('🔗 Using API_BASE_URL:', API_BASE_URL);
 
-    // Try direct fetch first (more reliable)
     try {
-      const queryString = new URLSearchParams(params).toString();
-      const cacheBuster = `_t=${Date.now()}`;
-      const separator = queryString ? '&' : '?';
-      const url = `${API_BASE_URL}/tea/list${queryString ? '?' + queryString : ''}${separator}${cacheBuster}`;
-      console.log('🌐 Fetch URL:', url);
+      console.log('🔄 Making axios request to /tea/list...');
+      const response = await api.get('/tea/list', { params });
+      console.log('✅ Axios request successful:', response.data);
+      return response.data;
+    } catch (axiosError) {
+      console.error('❌ Axios failed, trying direct fetch...', axiosError);
 
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-        },
-        mode: 'cors',
-        cache: 'no-cache',
-      });
-
-      console.log('📡 Fetch response status:', response.status, response.statusText);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ Fetch error response:', errorText);
-        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
-      }
-
-      const data = await response.json();
-      console.log('✅ Fetch successful!', data);
-      return data;
-    } catch (fetchError) {
-      console.error('❌ Fetch failed, trying axios...', fetchError);
-
-      // Fallback to axios
+      // Fallback to direct fetch with simplified config
       try {
-        console.log('🔄 Trying axios request...');
-        const response = await api.get('/tea/list', { params });
-        console.log('✅ Axios request successful:', response.data);
-        return response.data;
-      } catch (axiosError) {
-        console.error('❌ Both fetch and axios failed:', axiosError);
-        throw new Error(`Network error: ${fetchError.message}`);
+        const queryString = new URLSearchParams(params).toString();
+        const url = `${API_BASE_URL}/tea/list${queryString ? '?' + queryString : ''}`;
+        console.log('🌐 Fallback fetch URL:', url);
+
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+          mode: 'cors',
+        });
+
+        console.log('📡 Fetch response status:', response.status, response.statusText);
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ Fetch fallback successful!', data);
+        return data;
+      } catch (fetchError) {
+        console.error('❌ Both axios and fetch failed:', fetchError);
+        throw new Error(`Network error: Unable to connect to server. Please check your internet connection.`);
       }
     }
   },
   
   // Get single tea post
   getTeaPost: async (teaId) => {
-    const response = await api.get(`/tea/${teaId}`);
-    return response.data;
+    try {
+      const response = await api.get(`/tea/${teaId}`);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error fetching tea post:', error);
+      throw new Error(`Failed to load tea post: ${error.message}`);
+    }
   },
   
   // Create new tea post
