@@ -34,7 +34,8 @@ const corsOptions = {
   origin: [
     'http://localhost:3000',
     'http://localhost:3001',
-    'https://dihhjbitchin-ido5.onrender.com'
+    'https://dihhjbitchin-ido5.onrender.com',
+    'https://your-backend-app.onrender.com'
   ],
   credentials: false, // Set to false to avoid CORS credential issues
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
